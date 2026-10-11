@@ -1,0 +1,4544 @@
+<!DOCTYPE html>
+<html lang="ne">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <meta name="theme-color" content="#0d6efd">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <title>समूह बचत एप</title>
+  <style>
+/* ===== Reset & Base ===== */
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+  -webkit-tap-highlight-color: transparent;
+}
+
+:root {
+  --primary: #0d6efd;
+  --primary-dark: #0a58ca;
+  --success: #198754;
+  --success-dark: #146c43;
+  --warning: #ffc107;
+  --danger: #dc3545;
+  --info: #0dcaf0;
+  --purple: #6f42c1;
+  --orange: #fd7e14;
+  --teal: #20c997;
+  --dark: #212529;
+  --gray: #6c757d;
+  --light: #f8f9fa;
+  --white: #ffffff;
+  --border: #dee2e6;
+  --shadow: 0 4px 12px rgba(0,0,0,0.1);
+  --radius: 16px;
+  --header-h: 70px;
+  --nav-h: 64px;
+}
+
+html, body {
+  height: 100%;
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Noto Sans Devanagari', sans-serif;
+  background: #e9ecef;
+  color: var(--dark);
+  overflow-x: hidden;
+  font-size: 15px;
+}
+
+#app {
+  max-width: 480px;
+  margin: 0 auto;
+  min-height: 100vh;
+  background: var(--light);
+  position: relative;
+  box-shadow: 0 0 30px rgba(0,0,0,0.15);
+}
+
+/* ===== Screens ===== */
+.screen {
+  display: none;
+  min-height: 100vh;
+  flex-direction: column;
+}
+.screen.active {
+  display: flex;
+}
+
+/* ===== Loading ===== */
+#loading-screen {
+  background: linear-gradient(135deg, #0d6efd, #6f42c1);
+  color: white;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+}
+.loading-content h1 { margin: 12px 0 4px; font-size: 1.6rem; }
+.logo-big { font-size: 4rem; margin-bottom: 8px; }
+.spinner {
+  width: 40px; height: 40px;
+  border: 4px solid rgba(255,255,255,0.3);
+  border-top-color: white;
+  border-radius: 50%;
+  animation: spin 0.8s linear infinite;
+  margin: 20px auto 0;
+}
+@keyframes spin { to { transform: rotate(360deg); } }
+
+/* ===== Login ===== */
+#login-screen {
+  background: linear-gradient(160deg, #0d6efd 0%, #6f42c1 100%);
+  align-items: center;
+  justify-content: center;
+  padding: 20px;
+}
+.login-container {
+  width: 100%;
+  max-width: 360px;
+  text-align: center;
+  color: white;
+}
+.login-container h1 { font-size: 1.7rem; margin-bottom: 4px; }
+.subtitle { opacity: 0.85; margin-bottom: 28px; font-size: 0.95rem; }
+
+#login-options { display: flex; flex-direction: column; gap: 12px; }
+
+.form-card {
+  background: white;
+  color: var(--dark);
+  border-radius: var(--radius);
+  padding: 20px;
+  text-align: left;
+  margin-top: 10px;
+  box-shadow: var(--shadow);
+}
+.form-card h2 { text-align: center; margin-bottom: 16px; font-size: 1.2rem; }
+.form-card.hidden { display: none; }
+
+.form-group { margin-bottom: 14px; }
+.form-group label {
+  display: block;
+  font-size: 0.85rem;
+  font-weight: 600;
+  margin-bottom: 4px;
+  color: var(--gray);
+}
+.form-group input, .form-group select, .form-group textarea {
+  width: 100%;
+  padding: 11px 14px;
+  border: 1.5px solid var(--border);
+  border-radius: 10px;
+  font-size: 1rem;
+  outline: none;
+  transition: border 0.2s;
+  background: #fff;
+}
+.form-group input:focus, .form-group select:focus {
+  border-color: var(--primary);
+}
+
+/* ===== Buttons ===== */
+.btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  padding: 11px 18px;
+  border: none;
+  border-radius: 12px;
+  font-size: 0.95rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s;
+  text-decoration: none;
+}
+.btn:active { transform: scale(0.97); }
+.btn-lg { padding: 14px 20px; font-size: 1.05rem; }
+.btn-block { width: 100%; margin-top: 8px; }
+.btn-sm { padding: 7px 12px; font-size: 0.85rem; }
+
+.btn-primary { background: var(--primary); color: white; }
+.btn-primary:hover { background: var(--primary-dark); }
+.btn-success { background: var(--success); color: white; }
+.btn-success:hover { background: var(--success-dark); }
+.btn-warning { background: var(--warning); color: #212529; }
+.btn-danger { background: var(--danger); color: white; }
+.btn-info { background: var(--info); color: #000; }
+.btn-purple { background: var(--purple); color: white; }
+.btn-orange { background: var(--orange); color: white; }
+.btn-teal { background: var(--teal); color: white; }
+.btn-outline {
+  background: transparent;
+  border: 2px solid rgba(255,255,255,0.7);
+  color: white;
+}
+.form-card .btn-outline {
+  border-color: var(--border);
+  color: var(--dark);
+}
+.btn-light { background: var(--light); color: var(--dark); border: 1px solid var(--border); }
+
+/* ===== Header ===== */
+#app-header {
+  background: linear-gradient(135deg, #0d6efd, #6610f2);
+  color: white;
+  padding: 12px 16px;
+  position: sticky;
+  top: 0;
+  z-index: 100;
+}
+.header-top {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+}
+.group-info { display: flex; align-items: center; gap: 10px; }
+.group-logo { font-size: 2rem; }
+.group-name { font-weight: 700; font-size: 1.05rem; }
+.group-meta { font-size: 0.75rem; opacity: 0.85; }
+.header-right { text-align: right; }
+.nepali-datetime { font-size: 0.78rem; opacity: 0.9; }
+.month-status {
+  display: inline-block;
+  margin-top: 4px;
+  padding: 3px 10px;
+  border-radius: 20px;
+  font-size: 0.72rem;
+  font-weight: 600;
+  background: rgba(255,255,255,0.2);
+}
+
+/* ===== Navigation ===== */
+#main-nav {
+  display: flex;
+  background: white;
+  border-bottom: 1px solid var(--border);
+  position: sticky;
+  top: var(--header-h);
+  z-index: 90;
+  box-shadow: 0 2px 6px rgba(0,0,0,0.05);
+}
+.nav-btn {
+  flex: 1;
+  padding: 10px 4px;
+  border: none;
+  background: none;
+  font-size: 1.2rem;
+  color: var(--gray);
+  cursor: pointer;
+  transition: all 0.2s;
+  line-height: 1.3;
+}
+.nav-btn span { font-size: 0.7rem; display: block; }
+.nav-btn.active {
+  color: var(--primary);
+  border-bottom: 3px solid var(--primary);
+  background: #f0f7ff;
+}
+
+/* ===== Tab Content ===== */
+#tab-content {
+  flex: 1;
+  padding: 14px;
+  padding-bottom: 30px;
+  overflow-y: auto;
+}
+.tab-pane { display: none; }
+.tab-pane.active { display: block; }
+
+/* ===== Home Cards ===== */
+.home-grid {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+.stats-row {
+  display: flex;
+  gap: 8px;
+  margin-bottom: 10px;
+}
+.stat-box {
+  flex: 1;
+  background: white;
+  border-radius: 14px;
+  padding: 10px 6px;
+  text-align: center;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.06);
+  border-bottom: 3px solid #dee2e6;
+}
+.stat-emoji { font-size: 1.3rem; line-height: 1.2; }
+.stat-label { font-size: 0.72rem; font-weight: 600; margin-top: 2px; }
+.stat-value { font-size: 1rem; font-weight: 700; color: #212529; margin-top: 2px; }
+
+.action-cards {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  margin-top: 4px;
+}
+.action-card {
+  border-radius: 16px;
+  padding: 16px 18px;
+  color: white;
+  cursor: pointer;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.12);
+  transition: transform 0.15s;
+}
+.action-card:active { transform: scale(0.97); }
+.ac-icon { font-size: 1.6rem; margin-bottom: 4px; }
+.ac-title { font-size: 1.1rem; font-weight: 700; }
+.ac-desc { font-size: 0.82rem; opacity: 0.9; margin-top: 2px; }
+.ac-teal { background: linear-gradient(135deg, #0d9488, #14b8a6); }
+.ac-orange { background: linear-gradient(135deg, #ea580c, #f97316); }
+.ac-blue { background: linear-gradient(135deg, #2563eb, #3b82f6); }
+.ac-purple { background: linear-gradient(135deg, #7c3aed, #8b5cf6); }
+
+.home-card {
+  background: white;
+  border-radius: var(--radius);
+  padding: 18px;
+  box-shadow: var(--shadow);
+  cursor: pointer;
+  transition: transform 0.15s, box-shadow 0.15s;
+  border-left: 5px solid transparent;
+}
+.home-card:active { transform: scale(0.98); }
+.card-assets { border-left-color: #6f42c1; }
+.card-members { border-left-color: #0d6efd; }
+.card-collection { border-left-color: #198754; }
+.card-loans { border-left-color: #fd7e14; }
+.card-reports { border-left-color: #0dcaf0; }
+
+.card-icon { font-size: 1.8rem; margin-bottom: 6px; }
+.card-title { font-weight: 700; font-size: 1.05rem; margin-bottom: 8px; }
+.card-desc { font-size: 0.85rem; color: var(--gray); }
+.card-values {
+  display: flex;
+  justify-content: space-between;
+  gap: 8px;
+  margin-top: 8px;
+}
+.val-item {
+  flex: 1;
+  text-align: center;
+  background: var(--light);
+  border-radius: 10px;
+  padding: 8px 4px;
+}
+.val-label { display: block; font-size: 0.7rem; color: var(--gray); margin-bottom: 2px; }
+.val-num { font-weight: 700; font-size: 0.95rem; color: var(--dark); }
+
+/* ===== Section Cards ===== */
+.section-card {
+  background: white;
+  border-radius: var(--radius);
+  padding: 16px;
+  margin-bottom: 14px;
+  box-shadow: var(--shadow);
+}
+.section-title {
+  font-size: 1.05rem;
+  font-weight: 700;
+  margin-bottom: 12px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.section-title .badge {
+  font-size: 0.7rem;
+  padding: 2px 8px;
+  border-radius: 10px;
+  background: var(--primary);
+  color: white;
+  font-weight: 600;
+}
+
+/* ===== Member List ===== */
+.search-box {
+  position: relative;
+  margin-bottom: 12px;
+}
+.search-box input {
+  width: 100%;
+  padding: 11px 14px 11px 40px;
+  border: 1.5px solid var(--border);
+  border-radius: 12px;
+  font-size: 0.95rem;
+}
+.search-box::before {
+  content: '🔍';
+  position: absolute;
+  left: 12px;
+  top: 50%;
+  transform: translateY(-50%);
+  font-size: 1.1rem;
+}
+.member-item {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 12px;
+  border-bottom: 1px solid var(--border);
+  cursor: pointer;
+  transition: background 0.15s;
+}
+.member-item:last-child { border-bottom: none; }
+.member-item:active { background: #f0f7ff; }
+.member-avatar {
+  width: 44px; height: 44px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, #0d6efd, #6f42c1);
+  color: white;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 700;
+  font-size: 1.1rem;
+  flex-shrink: 0;
+}
+.member-info { flex: 1; min-width: 0; }
+.member-name { font-weight: 600; font-size: 0.95rem; }
+.member-meta { font-size: 0.78rem; color: var(--gray); margin-top: 2px; }
+.member-badge {
+  font-size: 0.75rem;
+  padding: 3px 8px;
+  border-radius: 8px;
+  font-weight: 600;
+}
+.badge-kitta { background: #e7f1ff; color: #0d6efd; }
+.badge-loan { background: #fff3cd; color: #856404; }
+.badge-advance { background: #d1e7dd; color: #0f5132; }
+.badge-due { background: #f8d7da; color: #842029; }
+
+/* ===== Collection ===== */
+.collection-header {
+  display: flex;
+  gap: 8px;
+  margin-bottom: 14px;
+  flex-wrap: wrap;
+}
+.stat-pill {
+  flex: 1;
+  min-width: 90px;
+  background: white;
+  border-radius: 12px;
+  padding: 10px;
+  text-align: center;
+  box-shadow: 0 2px 6px rgba(0,0,0,0.06);
+}
+.stat-pill .num { font-weight: 700; font-size: 1.1rem; }
+.stat-pill .lbl { font-size: 0.7rem; color: var(--gray); }
+
+.pay-summary {
+  background: #f0f7ff;
+  border-radius: 12px;
+  padding: 14px;
+  margin-bottom: 14px;
+}
+.pay-row {
+  display: flex;
+  justify-content: space-between;
+  padding: 5px 0;
+  font-size: 0.9rem;
+}
+.pay-row.total {
+  border-top: 2px solid var(--primary);
+  margin-top: 6px;
+  padding-top: 8px;
+  font-weight: 700;
+  font-size: 1.05rem;
+}
+.pay-row .amount { font-weight: 600; }
+
+/* ===== Tables ===== */
+.table-wrap { overflow-x: auto; margin: 10px 0; }
+table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.82rem;
+}
+th, td {
+  padding: 8px 6px;
+  text-align: right;
+  border-bottom: 1px solid var(--border);
+}
+th {
+  background: var(--light);
+  font-weight: 600;
+  color: var(--gray);
+  white-space: nowrap;
+}
+td:first-child, th:first-child { text-align: left; }
+tr:active { background: #f0f7ff; }
+
+/* ===== Modal ===== */
+.modal-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0,0,0,0.5);
+  z-index: 1000;
+  display: flex;
+  align-items: flex-end;
+  justify-content: center;
+  padding: 0;
+}
+.modal-overlay.hidden { display: none; }
+.modal {
+  background: white;
+  border-radius: 20px 20px 0 0;
+  width: 100%;
+  max-width: 480px;
+  max-height: 90vh;
+  display: flex;
+  flex-direction: column;
+  animation: slideUp 0.25s ease;
+}
+@keyframes slideUp {
+  from { transform: translateY(100%); }
+  to { transform: translateY(0); }
+}
+.modal-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 16px 18px;
+  border-bottom: 1px solid var(--border);
+}
+.modal-header h3 { font-size: 1.1rem; }
+.modal-close {
+  background: none;
+  border: none;
+  font-size: 1.3rem;
+  cursor: pointer;
+  color: var(--gray);
+  padding: 4px 8px;
+}
+.modal-body {
+  padding: 16px 18px;
+  overflow-y: auto;
+  flex: 1;
+}
+.modal-footer {
+  padding: 12px 18px;
+  border-top: 1px solid var(--border);
+  display: flex;
+  gap: 10px;
+  justify-content: flex-end;
+}
+.pin-modal { max-width: 320px; border-radius: 16px; margin: auto; }
+.pin-input {
+  width: 100%;
+  padding: 14px;
+  font-size: 1.5rem;
+  text-align: center;
+  letter-spacing: 8px;
+  border: 2px solid var(--border);
+  border-radius: 12px;
+  margin-top: 10px;
+}
+
+/* ===== Signature Pad ===== */
+.sig-pad-wrap {
+  border: 2px dashed var(--border);
+  border-radius: 12px;
+  overflow: hidden;
+  background: #fafafa;
+  margin: 10px 0;
+}
+#sig-canvas {
+  width: 100%;
+  height: 160px;
+  display: block;
+  touch-action: none;
+}
+.sig-actions {
+  display: flex;
+  gap: 8px;
+  margin-top: 8px;
+}
+
+/* ===== Toast ===== */
+.toast {
+  position: fixed;
+  bottom: 80px;
+  left: 50%;
+  transform: translateX(-50%);
+  background: var(--dark);
+  color: white;
+  padding: 12px 24px;
+  border-radius: 30px;
+  font-size: 0.9rem;
+  z-index: 2000;
+  box-shadow: var(--shadow);
+  max-width: 90%;
+  text-align: center;
+}
+.toast.hidden { display: none; }
+.toast.success { background: var(--success); }
+.toast.error { background: var(--danger); }
+
+/* ===== Empty State ===== */
+.empty-state {
+  text-align: center;
+  padding: 40px 20px;
+  color: var(--gray);
+}
+.empty-state .icon { font-size: 3rem; margin-bottom: 10px; }
+
+/* ===== Settings List ===== */
+.settings-list { list-style: none; }
+.settings-item {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  padding: 14px 0;
+  border-bottom: 1px solid var(--border);
+  cursor: pointer;
+}
+.settings-item:last-child { border-bottom: none; }
+.settings-icon {
+  width: 40px; height: 40px;
+  border-radius: 12px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.2rem;
+  flex-shrink: 0;
+}
+.settings-text { flex: 1; }
+.settings-text .title { font-weight: 600; }
+.settings-text .desc { font-size: 0.78rem; color: var(--gray); }
+.settings-arrow { color: var(--gray); font-size: 1.1rem; }
+
+/* ===== Report Card ===== */
+.report-card {
+  background: white;
+  border-radius: var(--radius);
+  padding: 16px;
+  margin-bottom: 12px;
+  box-shadow: var(--shadow);
+}
+.report-row {
+  display: flex;
+  justify-content: space-between;
+  padding: 7px 0;
+  border-bottom: 1px dashed var(--border);
+  font-size: 0.9rem;
+}
+.report-row:last-child { border-bottom: none; }
+.report-row .label { color: var(--gray); }
+.report-row .value { font-weight: 600; }
+.report-row.highlight {
+  background: #f0f7ff;
+  margin: 4px -8px;
+  padding: 8px;
+  border-radius: 8px;
+  border: none;
+}
+
+/* ===== Status Colors ===== */
+.status-open { background: #d1e7dd; color: #0f5132; }
+.status-collection-closed { background: #fff3cd; color: #856404; }
+.status-month-closed { background: #f8d7da; color: #842029; }
+
+/* ===== Utility ===== */
+.hidden { display: none !important; }
+.text-center { text-align: center; }
+.text-right { text-align: right; }
+.text-muted { color: var(--gray); }
+.text-success { color: var(--success); }
+.text-danger { color: var(--danger); }
+.text-primary { color: var(--primary); }
+.mt-1 { margin-top: 8px; }
+.mt-2 { margin-top: 14px; }
+.mb-1 { margin-bottom: 8px; }
+.mb-2 { margin-bottom: 14px; }
+.flex { display: flex; }
+.flex-between { display: flex; justify-content: space-between; align-items: center; }
+.gap-1 { gap: 8px; }
+.gap-2 { gap: 12px; }
+.fw-bold { font-weight: 700; }
+
+/* Print / Image capture area */
+.print-area {
+  background: white;
+  padding: 20px;
+  color: #000;
+}
+.print-area h2 { text-align: center; margin-bottom: 12px; }
+.print-area .print-meta { text-align: center; font-size: 0.85rem; color: #555; margin-bottom: 16px; }
+
+/* Responsive small tweaks */
+@media (max-width: 360px) {
+  .card-values { flex-direction: column; }
+  .val-item { display: flex; justify-content: space-between; padding: 6px 10px; }
+}
+
+</style>
+  
+</head>
+<body>
+  <div id="app">
+    <!-- Loading Screen -->
+    <div id="loading-screen" class="screen active">
+      <div class="loading-content">
+        <div class="logo-big">💰</div>
+        <h1>समूह बचत एप</h1>
+        <p>लोड हुँदैछ...</p>
+        <div class="spinner"></div>
+      </div>
+    </div>
+
+    <!-- Login Screen -->
+    <div id="login-screen" class="screen">
+      <div class="login-container">
+        <div class="logo-big">💰</div>
+        <h1>समूह बचत एप</h1>
+        <p class="subtitle">गाउँको बचत र ऋण व्यवस्थापन</p>
+
+        <div id="login-options">
+          <button class="btn btn-primary btn-lg" onclick="showAdminLogin()">
+            🔐 Admin लगइन
+          </button>
+          <button class="btn btn-success btn-lg" onclick="showMemberLogin()">
+            👤 सदस्य लगइन
+          </button>
+          <button class="btn btn-outline btn-lg" id="create-account-btn" onclick="showCreateAccount()">
+            ➕ नयाँ खाता बनाउनुहोस्
+          </button>
+        </div>
+
+        <!-- Create Account Form -->
+        <div id="create-account-form" class="form-card hidden">
+          <h2>🆕 नयाँ Admin खाता</h2>
+          <div class="form-group">
+            <label>👤 पूरा नाम</label>
+            <input type="text" id="ca-name" placeholder="तपाईंको नाम">
+          </div>
+          <div class="form-group">
+            <label>🔑 Username</label>
+            <input type="text" id="ca-username" placeholder="username">
+          </div>
+          <div class="form-group">
+            <label>🔒 Password</label>
+            <input type="password" id="ca-password" placeholder="password">
+          </div>
+          <div class="form-group">
+            <label>🔒 Password Confirm</label>
+            <input type="password" id="ca-password2" placeholder="फेरि password">
+          </div>
+          <div class="form-group">
+            <label>📱 मोबाइल नम्बर</label>
+            <input type="tel" id="ca-mobile" placeholder="98xxxxxxxx">
+          </div>
+          <div class="form-group">
+            <label>🔢 PIN (४ अंक)</label>
+            <input type="password" id="ca-pin" maxlength="4" placeholder="४ अंकको PIN">
+          </div>
+          <div class="form-group">
+            <label>🔢 PIN Confirm</label>
+            <input type="password" id="ca-pin2" maxlength="4" placeholder="फेरि PIN">
+          </div>
+          <button class="btn btn-primary btn-block" onclick="createAccount()">✅ खाता बनाउनुहोस्</button>
+          <button class="btn btn-outline btn-block" onclick="backToLoginOptions()">← फर्कनुहोस्</button>
+        </div>
+
+        <!-- Admin Login Form -->
+        <div id="admin-login-form" class="form-card hidden">
+          <h2>🔐 Admin लगइन</h2>
+          <div class="form-group">
+            <label>🔑 Username</label>
+            <input type="text" id="admin-username" placeholder="username">
+          </div>
+          <div class="form-group">
+            <label>🔒 Password</label>
+            <input type="password" id="admin-password" placeholder="password">
+          </div>
+          <button class="btn btn-primary btn-block" onclick="adminLogin()">🔓 लगइन</button>
+          <button class="btn btn-outline btn-block" onclick="backToLoginOptions()">← फर्कनुहोस्</button>
+        </div>
+
+        <!-- Member Login Form -->
+        <div id="member-login-form" class="form-card hidden">
+          <h2>👤 सदस्य लगइन</h2>
+          <div class="form-group">
+            <label>📱 मोबाइल नम्बर</label>
+            <input type="tel" id="member-mobile" placeholder="98xxxxxxxx">
+          </div>
+          <div class="form-group">
+            <label>🔢 PIN</label>
+            <input type="password" id="member-pin" maxlength="4" placeholder="४ अंकको PIN">
+          </div>
+          <button class="btn btn-success btn-block" onclick="memberLogin()">🔓 लगइन</button>
+          <button class="btn btn-warning btn-block" onclick="requestPin()">📩 PIN माग्नुहोस्</button>
+          <button class="btn btn-outline btn-block" onclick="backToLoginOptions()">← फर्कनुहोस्</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Main App Screen -->
+    <div id="main-screen" class="screen">
+      <!-- Header -->
+      <header id="app-header">
+        <div class="header-top">
+          <div class="group-info">
+            <span class="group-logo" id="header-logo">💰</span>
+            <div>
+              <div class="group-name" id="header-group-name">समूह बचत</div>
+              <div class="group-meta" id="header-group-meta">स्थापना: -</div>
+            </div>
+          </div>
+          <div class="header-right">
+            <div class="nepali-datetime" id="nepali-datetime">-</div>
+            <div class="month-status" id="month-status">⚪ महिना खुल्ला छैन</div>
+          </div>
+        </div>
+      </header>
+
+      <!-- Navigation -->
+      <nav id="main-nav">
+        <button class="nav-btn active" data-tab="home" onclick="switchTab('home')">
+          🏠<br><span>होम</span>
+        </button>
+        <button class="nav-btn" data-tab="profile" onclick="switchTab('profile')">
+          👤<br><span>प्रोफाइल</span>
+        </button>
+        <button class="nav-btn" data-tab="vidhan" onclick="switchTab('vidhan')">
+          📜<br><span>विधान</span>
+        </button>
+        <button class="nav-btn" data-tab="settings" onclick="switchTab('settings')">
+          ⚙️<br><span>सेटिङ</span>
+        </button>
+      </nav>
+
+      <!-- Tab Contents -->
+      <main id="tab-content">
+        <!-- HOME TAB -->
+        <div id="tab-home" class="tab-pane active">
+          <div id="home-admin">
+            <div id="mig-banner" class="hidden" style="background:#d1e7dd;color:#0f5132;padding:10px 14px;border-radius:12px;margin-bottom:10px;font-size:0.85rem;font-weight:600;text-align:center"></div>
+            <!-- Compact stats row 1 -->
+            <div class="stats-row">
+              <div class="stat-box" style="border-color:#6f42c1">
+                <div class="stat-emoji">💎</div>
+                <div class="stat-label" style="color:#6f42c1">सम्पत्ति</div>
+                <div class="stat-value" id="home-assets">0</div>
+              </div>
+              <div class="stat-box" style="border-color:#fd7e14">
+                <div class="stat-emoji">🤝</div>
+                <div class="stat-label" style="color:#fd7e14">लगानी</div>
+                <div class="stat-value" id="home-loans">0</div>
+              </div>
+              <div class="stat-box" style="border-color:#198754">
+                <div class="stat-emoji">💵</div>
+                <div class="stat-label" style="color:#198754">नगद</div>
+                <div class="stat-value" id="home-cash">0</div>
+              </div>
+            </div>
+            <!-- Compact stats row 2 -->
+            <div class="stats-row">
+              <div class="stat-box" style="border-color:#0d6efd">
+                <div class="stat-emoji">👥</div>
+                <div class="stat-label" style="color:#0d6efd">सदस्य</div>
+                <div class="stat-value" id="home-member-count">0</div>
+              </div>
+              <div class="stat-box" style="border-color:#6610f2">
+                <div class="stat-emoji">🎫</div>
+                <div class="stat-label" style="color:#6610f2">कित्ता</div>
+                <div class="stat-value" id="home-kitta-count">0</div>
+              </div>
+              <div class="stat-box" style="border-color:#0dcaf0">
+                <div class="stat-emoji">💰</div>
+                <div class="stat-label" style="color:#0891b2">प्रति कित्ता</div>
+                <div class="stat-value" id="home-per-kitta">0</div>
+              </div>
+            </div>
+            <!-- Action cards like the sample image -->
+            <div class="action-cards">
+              <div class="action-card ac-teal" onclick="openCollection()">
+                <div class="ac-icon">💳</div>
+                <div class="ac-title">मासिक असुली</div>
+                <div class="ac-desc">बचत, ब्याज र सावा बुझाउने</div>
+              </div>
+              <div class="action-card ac-orange" onclick="openLoans()">
+                <div class="ac-icon">🤝</div>
+                <div class="ac-title">ऋण लगानी</div>
+                <div class="ac-desc">नयाँ ऋण र बाँकी सूची</div>
+              </div>
+              <div class="action-card ac-blue" onclick="openReports()">
+                <div class="ac-icon">📊</div>
+                <div class="ac-title">हिसाब रिपोर्ट</div>
+                <div class="ac-desc">मासिक, सारांश र वार्षिक</div>
+              </div>
+            </div>
+          </div>
+          <div id="home-member" class="hidden"></div>
+        </div>
+
+        <!-- VIDHAN TAB -->
+        <div id="tab-vidhan" class="tab-pane">
+          <div id="vidhan-content"></div>
+        </div>
+
+        <!-- PROFILE TAB -->
+        <div id="tab-profile" class="tab-pane">
+          <div id="profile-content">
+            <!-- Will be rendered by JS based on role -->
+          </div>
+        </div>
+
+        <!-- SETTINGS TAB -->
+        <div id="tab-settings" class="tab-pane">
+          <div id="settings-content">
+            <!-- Will be rendered by JS -->
+          </div>
+        </div>
+      </main>
+    </div>
+
+    <!-- Modal Container -->
+    <div id="modal-overlay" class="modal-overlay hidden">
+      <div class="modal" id="modal-box">
+        <div class="modal-header">
+          <h3 id="modal-title">शीर्षक</h3>
+          <button class="modal-close" onclick="closeModal()">✕</button>
+        </div>
+        <div class="modal-body" id="modal-body">
+          <!-- Dynamic content -->
+        </div>
+        <div class="modal-footer" id="modal-footer">
+          <!-- Dynamic buttons -->
+        </div>
+      </div>
+    </div>
+
+    <!-- Toast -->
+    <div id="toast" class="toast hidden"></div>
+
+    <!-- PIN Modal -->
+    <div id="pin-modal" class="modal-overlay hidden">
+      <div class="modal pin-modal">
+        <div class="modal-header">
+          <h3>🔢 PIN प्रविष्ट गर्नुहोस्</h3>
+        </div>
+        <div class="modal-body">
+          <p id="pin-message">महिना बन्द गर्न PIN चाहिन्छ</p>
+          <input type="password" id="pin-input" maxlength="4" placeholder="४ अंकको PIN" class="pin-input">
+        </div>
+        <div class="modal-footer">
+          <button class="btn btn-outline" onclick="closePinModal()">रद्द</button>
+          <button class="btn btn-primary" onclick="confirmPin()">पुष्टि</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+/**
+ * Database Layer - localStorage based
+ * Easy to replace with Firebase later
+ */
+
+const DB = {
+  KEY: 'group_savings_v1',
+
+  // Default empty structure
+  getDefault() {
+    return {
+      version: 1,
+      group: {
+        name: 'समूह बचत',
+        address: '',
+        established: '',
+        logo: '💰'
+      },
+      admin: null, // { name, username, password, mobile, pin, memberId }
+      settings: {
+        monthlySaving: 500,       // प्रति कित्ता मासिक बचत
+        interestRate: 2,          // मासिक ब्याज %
+        fineRate: 5,              // जरिवाना %
+        kittaReduceFee: 2,        // कित्ता घटाउँदा %
+        exitFee: 3,               // बाहिरिँदा %
+        closePin: ''              // will be same as admin pin initially
+      },
+      members: [],                // array of member objects
+      months: [],                 // array of month records
+      currentMonthId: null,
+      migrationDone: false,       // अगाडिको हिसाब प्रविष्टि सकिएको?
+      migration: {
+        cash: 0,
+        loans: {},                // memberId -> amount
+        advances: {},             // memberId -> amount
+        kittas: {}                // memberId -> kitta count
+      },
+      pinRequests: [],            // { memberId, mobile, time, status }
+      complaints: [],             // { id, memberId, text, time, read, replies: [{from, text, time}] }
+      rules: [],                  // { id, text, time }
+      meetings: [],               // { id, title, decision, time }
+      suggestions: [],            // { id, memberId, text, time, reply }
+      activityLog: []
+    };
+  },
+
+  load() {
+    try {
+      const raw = localStorage.getItem(this.KEY);
+      if (!raw) return this.getDefault();
+      return JSON.parse(raw);
+    } catch (e) {
+      console.error('DB load error', e);
+      return this.getDefault();
+    }
+  },
+
+  save(data) {
+    try {
+      localStorage.setItem(this.KEY, JSON.stringify(data));
+      return true;
+    } catch (e) {
+      console.error('DB save error', e);
+      return false;
+    }
+  },
+
+  // Helper: get current data, modify, save
+  update(fn) {
+    const data = this.load();
+    fn(data);
+    this.save(data);
+    return data;
+  },
+
+  /**
+   * Export — पहिले Save As (लोकेसन छान्ने), नभए डाउनलोड
+   */
+  async exportJSON() {
+    const data = this.load();
+    const fname = `samuha-backup-${new Date().toISOString().slice(0,10)}.json`;
+    const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
+
+    if (typeof window.showSaveFilePicker === 'function') {
+      try {
+        const handle = await window.showSaveFilePicker({
+          suggestedName: fname,
+          types: [{
+            description: 'JSON Backup',
+            accept: { 'application/json': ['.json'] }
+          }]
+        });
+        const writable = await handle.createWritable();
+        await writable.write(blob);
+        await writable.close();
+        return fname;
+      } catch (err) {
+        if (err && (err.name === 'AbortError' || err.name === 'NotAllowedError')) {
+          return null; // user cancelled
+        }
+      }
+    }
+
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = fname;
+    document.body.appendChild(a);
+    a.click();
+    setTimeout(() => { URL.revokeObjectURL(url); a.remove(); }, 400);
+    return fname;
+  },
+
+  // Import backup
+  importJSON(file) {
+    return new Promise((resolve, reject) => {
+      const reader = new FileReader();
+      reader.onload = (e) => {
+        try {
+          const data = JSON.parse(e.target.result);
+          if (!data.version || !data.members) {
+            reject(new Error('अमान्य फाइल'));
+            return;
+          }
+          this.save(data);
+          resolve(data);
+        } catch (err) {
+          reject(err);
+        }
+      };
+      reader.onerror = () => reject(new Error('फाइल पढ्न सकिएन'));
+      reader.readAsText(file);
+    });
+  },
+
+  // Clear all
+  clear() {
+    localStorage.removeItem(this.KEY);
+  }
+};
+/**
+ * Accounting Engine
+ * All formulas as per final design
+ */
+
+const Accounting = {
+  // Nepali months (साउन = 0 ... असार = 11)
+  NEPALI_MONTHS: [
+    'साउन', 'भदौ', 'असोज', 'कात्तिक',
+    'मंसिर', 'पुस', 'माघ', 'फागुन',
+    'चैत', 'बैशाख', 'जेठ', 'असार'
+  ],
+
+  formatNum(n) {
+    if (n === null || n === undefined || isNaN(n)) return '0';
+    return String(Math.round(Number(n)));
+  },
+
+  // Create initial 20 members
+  createDefaultMembers() {
+    const members = [];
+    for (let i = 1; i <= 20; i++) {
+      members.push({
+        id: 'm' + i,
+        name: 'सदस्य ' + i,
+        mobile: '',
+        pin: '',
+        kitta: 0,
+        photo: null,
+        active: true,
+        joinedMonthId: null,
+        // Running balances (updated each month close)
+        outstandingLoan: 0,   // उठ्न बाँकी ऋण
+        advance: 0,           // अग्रिम
+        due: 0,               // बाँकी (अनिवार्य नतिरेको)
+        // History for passbook
+        assetHistory: [],     // { monthId, prev, added, total }
+        loanHistory: []       // { monthId, prev, taken, repaid, balance }
+      });
+    }
+    return members;
+  },
+
+  // Get total kittas of active members
+  totalKitta(data) {
+    return data.members
+      .filter(m => m.active)
+      .reduce((s, m) => s + (m.kitta || 0), 0);
+  },
+
+  totalMembers(data) {
+    return data.members.filter(m => m.active).length;
+  },
+
+  // Current month object
+  getCurrentMonth(data) {
+    if (!data.currentMonthId) return null;
+    return data.months.find(m => m.id === data.currentMonthId) || null;
+  },
+
+  // Previous closed month (chronological: year + monthIndex + closedAt)
+  getPreviousMonth(data) {
+    const closed = (data.months || []).filter(m => m.status === 'closed');
+    if (closed.length === 0) return null;
+    closed.sort((a, b) => {
+      if ((a.yearBS || 0) !== (b.yearBS || 0)) return (a.yearBS || 0) - (b.yearBS || 0);
+      if ((a.monthIndex || 0) !== (b.monthIndex || 0)) return (a.monthIndex || 0) - (b.monthIndex || 0);
+      return String(a.closedAt || '').localeCompare(String(b.closedAt || ''));
+    });
+    return closed[closed.length - 1];
+  },
+
+  // All closed months in order
+  getClosedMonthsSorted(data) {
+    const closed = (data.months || []).filter(m => m.status === 'closed');
+    closed.sort((a, b) => {
+      if ((a.yearBS || 0) !== (b.yearBS || 0)) return (a.yearBS || 0) - (b.yearBS || 0);
+      if ((a.monthIndex || 0) !== (b.monthIndex || 0)) return (a.monthIndex || 0) - (b.monthIndex || 0);
+      return String(a.closedAt || '').localeCompare(String(b.closedAt || ''));
+    });
+    return closed;
+  },
+
+  /**
+   * Single source of truth for all screens (home, profile, passbook, reports)
+   * assets = group total property
+   * loans  = outstanding investment
+   * cash   = assets - loans
+   * kitta  = total shares
+   * perKitta = assets / kitta
+   */
+  /**
+   * HOME = latest group position only
+   * assets = current/last month finalAssets
+   * loans  = live sum of member outstanding (आजको सत्य)
+   * cash   = assets - loans
+   */
+  getSnapshot(data) {
+    if (data.migrationDone) this.syncOpenMonthFromMigration(data);
+
+    const month = this.getCurrentMonth(data);
+    const prev = this.getPreviousMonth(data);
+    const kitta = this.totalKitta(data);
+    const members = this.totalMembers(data);
+
+    const migLoans = Object.values((data.migration && data.migration.loans) || {})
+      .reduce((s, v) => s + (Number(v) || 0), 0);
+    const migCash = Number((data.migration && data.migration.cash) || 0);
+
+    let assets = 0;
+
+    if (month) {
+      // Open month: income may change; keep startAssets, refresh final
+      this.recalcMonth(month, data);
+      assets = Number(month.finalAssets) || 0;
+    } else if (prev) {
+      // No open month — last closed final (do not recalc with live loans)
+      assets = Number(prev.finalAssets) || 0;
+    } else if (data.migrationDone) {
+      assets = migCash + migLoans;
+    }
+
+    // Home always uses live member loans (current reality)
+    const loans = data.members.filter(m => m.active)
+      .reduce((s, m) => s + (Number(m.outstandingLoan) || 0), 0);
+    const cash = assets - loans;
+    const perKitta = kitta > 0 ? Math.round(assets / kitta) : 0;
+
+    return { assets, loans, cash, kitta, members, perKitta, month, prev, migCash, migLoans };
+  },
+
+  // Per kitta value — works even without open month (uses migration/previous)
+  perKittaValue(data, month) {
+    const snap = this.getSnapshot(data);
+    if (month && month.finalAssets && (month.totalKitta || snap.kitta) > 0) {
+      const k = month.totalKitta || snap.kitta;
+      return Math.round((month.finalAssets || 0) / k);
+    }
+    return snap.perKitta;
+  },
+
+  // Member's share of group assets
+  memberAssets(data, member) {
+    const snap = this.getSnapshot(data);
+    return snap.perKitta * (member.kitta || 0);
+  },
+
+  // Interest on PREVIOUS month-end loan balance
+  // First month after migration: interest on migration loan (past loan)
+  calcInterest(member, prevMonth, rate, data) {
+    let prevLoan = 0;
+    if (prevMonth) {
+      prevLoan = (prevMonth.memberSnapshots && prevMonth.memberSnapshots[member.id])
+        ? (prevMonth.memberSnapshots[member.id].outstandingLoan || 0)
+        : (member.outstandingLoan || 0);
+    } else if (data && data.migrationDone && data.migration.loans) {
+      // First app month: migration loans are "previous" outstanding
+      prevLoan = Number(data.migration.loans[member.id]) || 0;
+    }
+    return Math.round(prevLoan * ((rate || 0) / 100));
+  },
+
+  // What a member must pay this month (अनिवार्य)
+  // बाँकी (due) → अनिवार्य बढ्छ; अग्रिम → अनिवार्य (नगद) घट्छ
+  calcMandatory(member, data, month) {
+    const saving = (member.kitta || 0) * (data.settings.monthlySaving || 0);
+    const interest = this.calcInterest(member, this.getPreviousMonth(data), data.settings.interestRate, data);
+    const previousDue = member.due || 0;
+    const fine = Math.round(previousDue * ((data.settings.fineRate || 0) / 100));
+    const gross = saving + interest + fine + previousDue; // पूर्ण अनिवार्य
+    const advance = member.advance || 0;
+    const advanceCover = Math.min(advance, gross); // अग्रिमले कट्टा
+    const toPay = Math.max(0, gross - advanceCover); // नगद तिर्नुपर्ने
+    return {
+      saving,
+      interest,
+      fine,
+      previousDue,
+      gross,
+      advance,
+      advanceCover,
+      total: toPay,       // नगद अनिवार्य (अग्रिम कट्टा पछि)
+      totalGross: gross   // कट्टा अघिको जम्मा
+    };
+  },
+
+  // Allocate payment
+  // Order: saving → interest → fine → previousDue → principal(saawa) → advance
+  // advanceCover: amount already covered by existing advance (reduces what cash must fill)
+  allocatePayment(member, amount, mandatory, hasLoan, advanceCover = 0) {
+    // First apply advance cover against mandatory in same order
+    let coverLeft = advanceCover || 0;
+    const afterAdv = {
+      saving: mandatory.saving || 0,
+      interest: mandatory.interest || 0,
+      fine: mandatory.fine || 0,
+      previousDue: mandatory.previousDue || 0
+    };
+    ['saving', 'interest', 'fine', 'previousDue'].forEach(k => {
+      const use = Math.min(coverLeft, afterAdv[k]);
+      afterAdv[k] -= use;
+      coverLeft -= use;
+    });
+
+    let remaining = amount;
+    const result = {
+      saving: 0,
+      interest: 0,
+      fine: 0,
+      previousDue: 0,
+      principal: 0,
+      advance: 0,
+      totalPaid: amount,
+      fromAdvance: advanceCover || 0
+    };
+
+    // Cash fills what advance didn't cover
+    result.saving = Math.min(remaining, afterAdv.saving);
+    remaining -= result.saving;
+
+    result.interest = Math.min(remaining, afterAdv.interest);
+    remaining -= result.interest;
+
+    result.fine = Math.min(remaining, afterAdv.fine);
+    remaining -= result.fine;
+
+    result.previousDue = Math.min(remaining, afterAdv.previousDue);
+    remaining -= result.previousDue;
+
+    if (hasLoan && remaining > 0) {
+      const maxPrincipal = member.outstandingLoan || 0;
+      result.principal = Math.min(remaining, maxPrincipal);
+      remaining -= result.principal;
+    }
+
+    // Excess cash → new advance
+    result.advance = remaining;
+
+    return result;
+  },
+
+  // Create a new month — सुरु मौज्दात = पछिल्लो बन्द महिनाको अन्तिम मौज्दात मात्र
+  createMonth(data, monthIndex, yearBS) {
+    const prev = this.getPreviousMonth(data);
+    let startAssets = 0;
+    let startOutstanding = 0;
+
+    if (prev) {
+      // Always use LAST closed month (not migration, not first month)
+      this.recalcMonth(prev, data);
+      startAssets = Number(prev.finalAssets) || 0;
+      startOutstanding = Number(prev.outstandingLoans) || 0;
+    } else if (data.migrationDone) {
+      // First month only
+      startOutstanding = Object.values(data.migration.loans || {}).reduce((s, v) => s + (Number(v) || 0), 0);
+      startAssets = (Number(data.migration.cash) || 0) + startOutstanding;
+    }
+
+    const id = 'mth_' + yearBS + '_' + monthIndex + '_' + Date.now();
+    return {
+      id,
+      monthIndex,
+      yearBS,
+      name: this.NEPALI_MONTHS[monthIndex] + ' ' + yearBS,
+      status: 'open',
+      startAssets,
+      savingsCollected: 0,
+      interestCollected: 0,
+      otherIncome: 0,
+      expenses: 0,
+      netIncome: 0,
+      finalAssets: startAssets,
+      principalCollected: 0,
+      newLoansGiven: 0,
+      outstandingLoans: startOutstanding,
+      cashInHand: startAssets - startOutstanding,
+      totalMembers: this.totalMembers(data),
+      totalKitta: this.totalKitta(data),
+      collections: {},
+      loansGiven: [],
+      memberSnapshots: {},
+      otherIncomeDetails: [],
+      expenseDetails: [],
+      fromPrevMonthId: prev ? prev.id : null,
+      closedAt: null,
+      collectionClosedAt: null
+    };
+  },
+
+  /**
+   * Recalc ONE month only (does not change other months).
+   * RULE: Only CASH received affects मौज्दात.
+   * Advance usage does NOT add income.
+   * Closed month: outstandingLoans stays FROZEN (as at close).
+   * Open month: outstandingLoans = live member loans.
+   */
+  recalcMonth(month, data) {
+    let savings = 0, interest = 0, other = 0, expenses = 0;
+    let principal = 0, newLoans = 0, advanceFromCash = 0;
+
+    Object.values(month.collections || {}).forEach(c => {
+      const paid = Number(c.totalPaid) || 0;
+      if (paid <= 0) return; // advance-only: no income
+      savings += c.saving || 0;
+      interest += c.interest || 0;
+      principal += c.principal || 0;
+      if ((c.advance || 0) > 0) advanceFromCash += c.advance;
+    });
+
+    other = (month.otherIncomeDetails || []).reduce((s, d) => s + (d.amount || 0), 0);
+    expenses = (month.expenseDetails || []).reduce((s, d) => s + (d.amount || 0), 0);
+    newLoans = (month.loansGiven || []).reduce((s, l) => s + (l.amount || 0), 0);
+
+    month.savingsCollected = savings;
+    month.interestCollected = interest;
+    month.otherIncome = other;
+    month.expenses = expenses;
+    month.principalCollected = principal;
+    month.newLoansGiven = newLoans;
+    month.advanceFromCash = advanceFromCash;
+
+    month.netIncome = savings + interest + other + advanceFromCash - expenses;
+    month.finalAssets = (Number(month.startAssets) || 0) + month.netIncome;
+
+    if (month.status === 'closed') {
+      // FROZEN: prefer snapshot sum, else keep stored outstandingLoans
+      if (month.memberSnapshots && Object.keys(month.memberSnapshots).length) {
+        month.outstandingLoans = Object.values(month.memberSnapshots)
+          .reduce((s, snap) => s + (Number(snap.outstandingLoan) || 0), 0);
+      }
+      // else leave month.outstandingLoans as already stored at close
+    } else {
+      const liveOutstanding = data.members
+        .filter(m => m.active)
+        .reduce((s, m) => s + (Number(m.outstandingLoan) || 0), 0);
+      const prevOut = this.getStartOutstanding(data, month);
+      const calcOutstanding = Math.max(0, prevOut - principal + newLoans);
+      month.outstandingLoans = liveOutstanding > 0 ? liveOutstanding : calcOutstanding;
+    }
+
+    month.cashInHand = (Number(month.finalAssets) || 0) - (Number(month.outstandingLoans) || 0);
+    month.totalMembers = this.totalMembers(data);
+    month.totalKitta = this.totalKitta(data);
+
+    return month;
+  },
+
+  getStartOutstanding(data, month) {
+    // Chronological previous month (closed or not) — same chain rule as assets
+    const all = (data.months || []).slice().sort((a, b) => {
+      if ((a.yearBS || 0) !== (b.yearBS || 0)) return (a.yearBS || 0) - (b.yearBS || 0);
+      if ((a.monthIndex || 0) !== (b.monthIndex || 0)) return (a.monthIndex || 0) - (b.monthIndex || 0);
+      return String(a.id || '').localeCompare(String(b.id || ''));
+    });
+    const idx = all.findIndex(m => m.id === month.id);
+    if (idx > 0) {
+      return Number(all[idx - 1].outstandingLoans) || 0;
+    }
+    if (data.migrationDone) {
+      return Object.values(data.migration.loans || {}).reduce((s, v) => s + (Number(v) || 0), 0);
+    }
+    return 0;
+  },
+
+  getPreviousOutstanding(data, month) {
+    return this.getStartOutstanding(data, month);
+  },
+
+  // Apply migration to members
+  applyMigration(data) {
+    if (!data.migration) return;
+    if (!data.migration.loans) data.migration.loans = {};
+    if (!data.migration.advances) data.migration.advances = {};
+    if (!data.migration.kittas) data.migration.kittas = {};
+    data.members.forEach(m => {
+      if (data.migration.kittas[m.id] !== undefined) {
+        m.kitta = parseInt(data.migration.kittas[m.id], 10) || 0;
+      }
+      m.outstandingLoan = parseFloat(data.migration.loans[m.id]) || 0;
+      m.advance = parseFloat(data.migration.advances[m.id]) || 0;
+      m.due = 0;
+    });
+    data.migrationDone = true;
+    this.syncOpenMonthFromMigration(data);
+
+    // Seed passbook so profile/passbook show opening balances immediately
+    data.members.forEach(m => {
+      if (!m.active) return;
+      const assets = this.memberAssets(data, m);
+      m.assetHistory = [{
+        monthId: 'migration',
+        monthName: 'सुरु (माइग्रेशन)',
+        prev: 0,
+        added: assets,
+        total: assets
+      }];
+      if ((m.outstandingLoan || 0) > 0) {
+        m.loanHistory = [{
+          monthId: 'migration',
+          monthName: 'सुरु (माइग्रेशन)',
+          prev: 0,
+          taken: m.outstandingLoan,
+          repaid: 0,
+          balance: m.outstandingLoan
+        }];
+      } else {
+        m.loanHistory = m.loanHistory || [];
+      }
+    });
+  },
+
+  syncOpenMonthFromMigration(data) {
+    if (!data.migrationDone || !data.migration) return;
+    // ONLY first open month — never overwrite later months with migration figures
+    const closedCount = (data.months || []).filter(m => m.status === 'closed').length;
+    if (closedCount > 0) return;
+
+    const migLoans = Object.values(data.migration.loans || {}).reduce((s, v) => s + (Number(v) || 0), 0);
+    const migCash = Number(data.migration.cash || 0);
+    const assets = migCash + migLoans;
+    if (assets <= 0 && this.totalKitta(data) <= 0) return;
+
+    if (data.currentMonthId) {
+      const month = data.months.find(m => m.id === data.currentMonthId);
+      if (month) {
+        const hasActivity = Object.keys(month.collections || {}).length > 0 || (month.loansGiven || []).length > 0;
+        if (!hasActivity) {
+          month.startAssets = assets;
+          month.finalAssets = assets;
+          month.outstandingLoans = migLoans;
+          month.cashInHand = migCash;
+          month.totalKitta = this.totalKitta(data);
+          month.totalMembers = this.totalMembers(data);
+        }
+      }
+    }
+  },
+
+  // Close collection: those who didn't pay → due
+  closeCollection(data, month) {
+    data.members.filter(m => m.active).forEach(m => {
+      const coll = month.collections[m.id];
+      const mandatory = this.calcMandatory(m, data, month);
+
+      if (!coll) {
+        // No cash — apply advance once against FULL gross mandatory, remainder → due
+        let stillDue = mandatory.totalGross || mandatory.total || 0;
+        let used = 0;
+        if (m.advance > 0 && stillDue > 0) {
+          used = Math.min(m.advance, stillDue);
+          m.advance -= used;
+          stillDue -= used;
+        }
+        if (used > 0) {
+          month.collections[m.id] = {
+            saving: 0, interest: 0, fine: 0, previousDue: 0, principal: 0,
+            advance: 0, totalPaid: 0,
+            fromAdvance: used,
+            coveredByAdvance: true,
+            time: new Date().toISOString()
+          };
+        }
+        m.due = stillDue > 0 ? stillDue : 0;
+      } else {
+        // Cash was paid — apply allocation results
+        // Advance that was reserved at entry time
+        const reservedAdv = coll.fromAdvance || 0;
+        if (reservedAdv > 0) {
+          m.advance = Math.max(0, (m.advance || 0) - reservedAdv);
+        }
+        // Excess cash becomes new advance
+        if ((coll.advance || 0) > 0) {
+          m.advance = (m.advance || 0) + coll.advance;
+        }
+        if ((coll.principal || 0) > 0) {
+          m.outstandingLoan = Math.max(0, (m.outstandingLoan || 0) - coll.principal);
+        }
+
+        // Covered = cash components + advance reserved
+        const paidMandatory = (coll.saving || 0) + (coll.interest || 0) + (coll.fine || 0) + (coll.previousDue || 0);
+        const covered = paidMandatory + reservedAdv;
+        let shortfall = (mandatory.totalGross || mandatory.total) - covered;
+        if (shortfall > 0 && m.advance > 0) {
+          const used = Math.min(m.advance, shortfall);
+          m.advance -= used;
+          shortfall -= used;
+          coll.fromAdvance = reservedAdv + used;
+          coll.coveredByAdvance = true;
+        }
+        m.due = shortfall > 0 ? shortfall : 0;
+      }
+    });
+    month.status = 'collection_closed';
+    month.collectionClosedAt = new Date().toISOString();
+    this.recalcMonth(month, data);
+  },
+
+  // Close month fully — finalize & freeze this month's figures
+  closeMonth(data, month) {
+    if (month.status === 'open') {
+      this.closeCollection(data, month);
+    }
+    // Freeze outstanding at close = live member loans (today's truth for this moment)
+    const liveOut = data.members.filter(m => m.active)
+      .reduce((s, m) => s + (Number(m.outstandingLoan) || 0), 0);
+    month.outstandingLoans = liveOut;
+    this.recalcMonth(month, data);
+    // After recalcMonth (open path may overwrite) force freeze values
+    month.outstandingLoans = liveOut;
+    month.cashInHand = (Number(month.finalAssets) || 0) - liveOut;
+
+    data.members.filter(m => m.active).forEach(m => {
+      month.memberSnapshots[m.id] = {
+        kitta: m.kitta,
+        outstandingLoan: m.outstandingLoan || 0,
+        advance: m.advance || 0,
+        due: m.due || 0,
+        assets: this.perKittaValue(data, month) * (m.kitta || 0)
+      };
+
+      // Passbook history
+      const prevAsset = m.assetHistory.length
+        ? m.assetHistory[m.assetHistory.length - 1].total
+        : 0;
+      const currentAsset = month.memberSnapshots[m.id].assets;
+      m.assetHistory.push({
+        monthId: month.id,
+        monthName: month.name,
+        prev: prevAsset,
+        added: currentAsset - prevAsset,
+        total: currentAsset
+      });
+
+      const prevLoan = m.loanHistory.length
+        ? m.loanHistory[m.loanHistory.length - 1].balance
+        : (data.migration.loans[m.id] || 0);
+      const taken = (month.loansGiven || [])
+        .filter(l => l.memberId === m.id)
+        .reduce((s, l) => s + l.amount, 0);
+      const repaid = (month.collections[m.id] && month.collections[m.id].principal) || 0;
+      m.loanHistory.push({
+        monthId: month.id,
+        monthName: month.name,
+        prev: prevLoan,
+        taken,
+        repaid,
+        balance: m.outstandingLoan || 0
+      });
+    });
+
+    month.status = 'closed';
+    month.closedAt = new Date().toISOString();
+    data.currentMonthId = null;
+
+    const liveOut2 = data.members.filter(m => m.active)
+      .reduce((s, m) => s + (Number(m.outstandingLoan) || 0), 0);
+    month.outstandingLoans = liveOut2;
+    this.recalcMonth(month, data);
+    month.outstandingLoans = liveOut2;
+    month.cashInHand = (Number(month.finalAssets) || 0) - liveOut2;
+
+    if (data.months.filter(m => m.status === 'closed').length === 1) {
+      if (data.migration) data.migration.hideAfterFirst = true;
+    }
+
+    this.rebuildMonthChain(data);
+  },
+
+  /**
+   * Fix startAssets chain ONLY (does not invent loan numbers):
+   * Month 1 start = migration
+   * Month N start = Month N-1 finalAssets
+   * Each month finalAssets = start + that month's net income only
+   */
+  rebuildMonthChain(data) {
+    const months = (data.months || []).slice().sort((a, b) => {
+      if ((a.yearBS || 0) !== (b.yearBS || 0)) return (a.yearBS || 0) - (b.yearBS || 0);
+      if ((a.monthIndex || 0) !== (b.monthIndex || 0)) return (a.monthIndex || 0) - (b.monthIndex || 0);
+      return String(a.id || '').localeCompare(String(b.id || ''));
+    });
+    if (months.length === 0) return;
+
+    for (let i = 0; i < months.length; i++) {
+      const m = months[i];
+      if (i === 0) {
+        if (data.migrationDone && data.migration) {
+          const migLoans = Object.values(data.migration.loans || {}).reduce((s, v) => s + (Number(v) || 0), 0);
+          const migCash = Number(data.migration.cash || 0);
+          if (migCash + migLoans > 0) {
+            m.startAssets = migCash + migLoans;
+          }
+        }
+        m.fromPrevMonthId = null;
+      } else {
+        const prev = months[i - 1];
+        this.recalcMonth(prev, data);
+        m.startAssets = Number(prev.finalAssets) || 0;
+        m.fromPrevMonthId = prev.id;
+      }
+      this.recalcMonth(m, data);
+    }
+  }
+};
+/**
+ * Authentication & Role Management
+ */
+
+const Auth = {
+  currentUser: null, // { role: 'admin'|'member', memberId, name, ... }
+
+  isLoggedIn() {
+    return !!this.currentUser;
+  },
+
+  isAdmin() {
+    return this.currentUser && this.currentUser.role === 'admin';
+  },
+
+  isMember() {
+    return this.currentUser && this.currentUser.role === 'member';
+  },
+
+  logout() {
+    this.currentUser = null;
+    localStorage.removeItem('gs_session');
+    localStorage.removeItem('gs_last_activity');
+  },
+
+  // Restore session — stays logged in unless 15 min inactive
+  restoreSession() {
+    try {
+      const s = localStorage.getItem('gs_session');
+      if (!s) return false;
+      const lastAct = parseInt(localStorage.getItem('gs_last_activity') || '0', 10);
+      const INACTIVITY_MS = 15 * 60 * 1000;
+      if (lastAct && (Date.now() - lastAct > INACTIVITY_MS)) {
+        // More than 15 min idle — force logout
+        localStorage.removeItem('gs_session');
+        localStorage.removeItem('gs_last_activity');
+        return false;
+      }
+      this.currentUser = JSON.parse(s);
+      // Refresh activity on successful restore
+      localStorage.setItem('gs_last_activity', String(Date.now()));
+      return true;
+    } catch (e) {}
+    return false;
+  },
+
+  saveSession() {
+    if (this.currentUser) {
+      localStorage.setItem('gs_session', JSON.stringify(this.currentUser));
+      localStorage.setItem('gs_last_activity', String(Date.now()));
+    }
+  },
+
+  touchActivity() {
+    if (this.currentUser) {
+      localStorage.setItem('gs_last_activity', String(Date.now()));
+    }
+  },
+
+  // Create first admin account
+  createAccount(name, username, password, mobile, pin) {
+    const data = DB.load();
+    if (data.admin) {
+      return { ok: false, msg: 'Admin खाता पहिले नै बनिसकेको छ' };
+    }
+    if (!name || !username || !password || !mobile || !pin) {
+      return { ok: false, msg: 'सबै फिल्ड भर्नुहोस्' };
+    }
+    if (password.length < 4) {
+      return { ok: false, msg: 'Password कम्तिमा ४ अक्षरको हुनुपर्छ' };
+    }
+    if (pin.length !== 4 || !/^\d{4}$/.test(pin)) {
+      return { ok: false, msg: 'PIN ठीक ४ अंकको हुनुपर्छ' };
+    }
+
+    // Create members first
+    if (data.members.length === 0) {
+      data.members = Accounting.createDefaultMembers();
+    }
+
+    // First member becomes the admin person
+    const adminMember = data.members[0];
+    adminMember.name = name;
+    adminMember.mobile = mobile;
+    adminMember.pin = pin;
+
+    data.admin = {
+      name,
+      username,
+      password, // plain for simplicity (offline app); in production hash it
+      mobile,
+      pin,
+      memberId: adminMember.id
+    };
+    data.settings.closePin = pin;
+
+    DB.save(data);
+    return { ok: true, msg: 'खाता सफलतापूर्वक बन्यो!' };
+  },
+
+  adminLogin(username, password) {
+    const data = DB.load();
+    if (!data.admin) {
+      return { ok: false, msg: 'पहिला खाता बनाउनुहोस्' };
+    }
+    if (data.admin.username === username && data.admin.password === password) {
+      this.currentUser = {
+        role: 'admin',
+        memberId: data.admin.memberId,
+        name: data.admin.name,
+        username: data.admin.username
+      };
+      this.saveSession();
+      return { ok: true };
+    }
+    return { ok: false, msg: 'Username वा Password गलत छ' };
+  },
+
+  memberLogin(mobile, pin) {
+    const data = DB.load();
+    const member = data.members.find(m => m.mobile === mobile && m.active);
+    if (!member) {
+      return { ok: false, msg: 'यो मोबाइल नम्बर भएको सदस्य भेटिएन' };
+    }
+    if (!member.pin) {
+      return { ok: false, msg: 'तपाईंको PIN सेट भएको छैन। Admin बाट PIN माग्नुहोस्।' };
+    }
+    if (member.pin !== pin) {
+      return { ok: false, msg: 'PIN गलत छ' };
+    }
+    this.currentUser = {
+      role: 'member',
+      memberId: member.id,
+      name: member.name,
+      mobile: member.mobile
+    };
+    this.saveSession();
+
+    // Log activity
+    data.activityLog = data.activityLog || [];
+    data.activityLog.push({
+      type: 'member_login',
+      memberId: member.id,
+      time: new Date().toISOString()
+    });
+    DB.save(data);
+
+    return { ok: true };
+  },
+
+  requestPin(mobile) {
+    const data = DB.load();
+    const member = data.members.find(m => m.mobile === mobile && m.active);
+    if (!member) {
+      return { ok: false, msg: 'यो मोबाइल नम्बर भएको सदस्य भेटिएन' };
+    }
+    data.pinRequests = data.pinRequests || [];
+    // Avoid duplicate pending
+    if (data.pinRequests.some(r => r.memberId === member.id && r.status === 'pending')) {
+      return { ok: false, msg: 'PIN अनुरोध पहिले नै पठाइसक्नुभएको छ' };
+    }
+    data.pinRequests.push({
+      id: 'pr_' + Date.now(),
+      memberId: member.id,
+      memberName: member.name,
+      mobile,
+      time: new Date().toISOString(),
+      status: 'pending'
+    });
+    DB.save(data);
+    return { ok: true, msg: 'PIN अनुरोध Admin कहाँ पठाइयो' };
+  },
+
+  // Admin sets pin for a member
+  setMemberPin(memberId, pin) {
+    if (pin.length !== 4 || !/^\d{4}$/.test(pin)) {
+      return { ok: false, msg: 'PIN ठीक ४ अंकको हुनुपर्छ' };
+    }
+    const data = DB.load();
+    const member = data.members.find(m => m.id === memberId);
+    if (!member) return { ok: false, msg: 'सदस्य भेटिएन' };
+    member.pin = pin;
+    // Mark requests as approved
+    (data.pinRequests || []).forEach(r => {
+      if (r.memberId === memberId && r.status === 'pending') {
+        r.status = 'approved';
+      }
+    });
+    DB.save(data);
+    return { ok: true, msg: 'PIN सेट भयो' };
+  }
+};
+/**
+ * UI Helpers - Toast, Modal, Navigation, Rendering
+ */
+
+const UI = {
+  toast(msg, type = '') {
+    const el = document.getElementById('toast');
+    el.textContent = msg;
+    el.className = 'toast ' + type;
+    el.classList.remove('hidden');
+    setTimeout(() => el.classList.add('hidden'), 3000);
+  },
+
+  _modalStack: [],
+
+  /**
+   * @param {string} title
+   * @param {string} bodyHtml
+   * @param {string} footerHtml
+   * @param {{ root?: boolean }} options - root:true = नयाँ प्रवाह (stack खाली), अघिल्लो modal मा back नजाने
+   */
+  showModal(title, bodyHtml, footerHtml = '', options = {}) {
+    const overlay = document.getElementById('modal-overlay');
+    const isOpen = overlay && !overlay.classList.contains('hidden');
+
+    if (options.root) {
+      this._modalStack = [];
+    } else if (isOpen) {
+      const curTitle = document.getElementById('modal-title').textContent;
+      // एउटै स्क्रिन refresh (सेभ पछि) भए stack नबढाउने
+      if (curTitle !== title) {
+        this._modalStack = this._modalStack || [];
+        this._modalStack.push({
+          title: curTitle,
+          body: document.getElementById('modal-body').innerHTML,
+          footer: document.getElementById('modal-footer').innerHTML
+        });
+      }
+    }
+
+    document.getElementById('modal-title').textContent = title;
+    document.getElementById('modal-body').innerHTML = bodyHtml;
+    document.getElementById('modal-footer').innerHTML = footerHtml;
+    overlay.classList.remove('hidden');
+  },
+
+  closeModal() {
+    // Member: after viewing passbook/report, ask complaint once on close
+    if (typeof _askComplaintOnClose !== 'undefined' && _askComplaintOnClose &&
+        typeof Auth !== 'undefined' && Auth.isMember && Auth.isMember()) {
+      const info = _askComplaintOnClose;
+      _askComplaintOnClose = null;
+      this._modalStack = [];
+      document.getElementById('modal-overlay').classList.add('hidden');
+      setTimeout(() => {
+        if (typeof askComplaintAfterView === 'function') {
+          askComplaintAfterView(info.memberId, info.source);
+        }
+      }, 150);
+      return;
+    }
+
+    // Stack छ भने अघिल्लो dialog मा फर्कने (होममा होइन)
+    this._modalStack = this._modalStack || [];
+    if (this._modalStack.length > 0) {
+      const prev = this._modalStack.pop();
+      document.getElementById('modal-title').textContent = prev.title;
+      document.getElementById('modal-body').innerHTML = prev.body;
+      document.getElementById('modal-footer').innerHTML = prev.footer;
+      return;
+    }
+
+    document.getElementById('modal-overlay').classList.add('hidden');
+  },
+
+  showPinModal(message, callback) {
+    document.getElementById('pin-message').textContent = message;
+    document.getElementById('pin-input').value = '';
+    document.getElementById('pin-modal').classList.remove('hidden');
+    window._pinCallback = callback;
+    setTimeout(() => document.getElementById('pin-input').focus(), 200);
+  },
+
+  closePinModal() {
+    document.getElementById('pin-modal').classList.add('hidden');
+    window._pinCallback = null;
+  },
+
+  confirmPin() {
+    const pin = document.getElementById('pin-input').value;
+    const data = DB.load();
+    if (pin === data.admin.pin || pin === data.settings.closePin) {
+      // Save callback BEFORE closing (closePinModal clears it)
+      const cb = window._pinCallback;
+      window._pinCallback = null;
+      document.getElementById('pin-modal').classList.add('hidden');
+      if (cb) cb(true);
+    } else {
+      this.toast('PIN गलत छ', 'error');
+    }
+  },
+
+  // Nepali-ish datetime (simple approximation using AD for now + Nepali month names)
+  updateDateTime() {
+    const el = document.getElementById('nepali-datetime');
+    if (!el) return;
+    const now = new Date();
+    const days = ['आइतबार', 'सोमबार', 'मंगलबार', 'बुधबार', 'बिहिबार', 'शुक्रबार', 'शनिबार'];
+    const d = String(now.getDate()).padStart(2, '0');
+    const m = String(now.getMonth() + 1).padStart(2, '0');
+    const y = now.getFullYear();
+    const time = now.toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit', hour12: true });
+    el.textContent = days[now.getDay()] + ' ' + d + '/' + m + '/' + y + ' · ' + time;
+  },
+
+  updateHeader(data) {
+    document.getElementById('header-group-name').textContent = data.group.name || 'समूह बचत';
+    document.getElementById('header-logo').textContent = data.group.logo || '💰';
+    const meta = [];
+    if (data.group.address) meta.push(data.group.address);
+    if (data.group.established) meta.push('स्थापना: ' + data.group.established);
+    document.getElementById('header-group-meta').textContent = meta.join(' · ') || 'समूह प्रोफाइलबाट सेट गर्नुहोस्';
+
+    const month = Accounting.getCurrentMonth(data);
+    const statusEl = document.getElementById('month-status');
+    if (!month) {
+      statusEl.textContent = '⚪ महिना खुल्ला छैन';
+      statusEl.className = 'month-status';
+    } else if (month.status === 'open') {
+      statusEl.textContent = '🟢 ' + month.name + ' · खुल्ला';
+      statusEl.className = 'month-status status-open';
+    } else if (month.status === 'collection_closed') {
+      statusEl.textContent = '🟡 ' + month.name + ' · कलेक्सन बन्द';
+      statusEl.className = 'month-status status-collection-closed';
+    } else {
+      statusEl.textContent = '🔴 ' + month.name + ' · बन्द';
+      statusEl.className = 'month-status status-month-closed';
+    }
+  },
+
+  updateHome(data) {
+    try {
+      const raw = localStorage.getItem('group_savings_v1');
+      if (raw) data = JSON.parse(raw);
+    } catch (e) {}
+
+    const snap = Accounting.getSnapshot(data);
+    const setTxt = (id, val) => { const el = document.getElementById(id); if (el) el.textContent = Accounting.formatNum(val); };
+    setTxt('home-assets', snap.assets);
+    setTxt('home-loans', snap.loans);
+    setTxt('home-cash', snap.cash);
+    setTxt('home-member-count', snap.members);
+    setTxt('home-kitta-count', snap.kitta);
+    setTxt('home-per-kitta', snap.perKitta);
+
+    const banner = document.getElementById('mig-banner');
+    if (banner) {
+      if (data.migration && data.migration.hideAfterFirst) {
+        banner.classList.add('hidden');
+      } else if (data.migrationDone && (snap.migCash > 0 || snap.migLoans > 0 || snap.kitta > 0)) {
+        banner.classList.remove('hidden');
+        banner.innerHTML = '✅ माइग्रेशन: नगद ' + Accounting.formatNum(snap.migCash) +
+          ' · ऋण ' + Accounting.formatNum(snap.migLoans) +
+          ' · कित्ता ' + Accounting.formatNum(snap.kitta) +
+          ' · प्रति कित्ता ' + Accounting.formatNum(snap.perKitta);
+      } else if (data.migrationDone) {
+        banner.classList.remove('hidden');
+        banner.innerHTML = '⚠️ माइग्रेशन सेभ छ तर सबै 0 — अगाडिको हिसाबमा कित्ता/नगद हाल्नुहोस्';
+      } else {
+        banner.classList.add('hidden');
+      }
+    }
+  },
+
+  // Render member list HTML
+  renderMemberList(members, onClickFnName, showBadges = true) {
+    if (!members.length) {
+      return '<div class="empty-state"><div class="icon">👥</div>कुनै सदस्य छैन</div>';
+    }
+    const data = DB.load();
+    return members.map(m => {
+      let badges = '';
+      if (showBadges) {
+        const assets = Accounting.memberAssets(data, m);
+        if (m.kitta > 0) badges += `<span class="member-badge badge-kitta">${m.kitta} कित्ता</span> `;
+        if (assets > 0) badges += `<span class="member-badge badge-kitta">💎 ${Accounting.formatNum(assets)}</span> `;
+        if (m.outstandingLoan > 0) badges += `<span class="member-badge badge-loan">ऋण ${Accounting.formatNum(m.outstandingLoan)}</span> `;
+        if (m.advance > 0) badges += `<span class="member-badge badge-advance">अग्रिम ${Accounting.formatNum(m.advance)}</span> `;
+        if (m.due > 0) badges += `<span class="member-badge badge-due">बाँकी ${Accounting.formatNum(m.due)}</span> `;
+      }
+      const initial = (m.name || '?').charAt(0);
+      return `
+        <div class="member-item" onclick="${onClickFnName}('${m.id}')">
+          <div class="member-avatar">${initial}</div>
+          <div class="member-info">
+            <div class="member-name">${m.name}</div>
+            <div class="member-meta">${m.mobile || 'मोबाइल नभएको'} ${badges}</div>
+          </div>
+        </div>`;
+    }).join('');
+  }
+};
+
+// Global helpers for HTML onclick
+function closeModal() { UI.closeModal(); }
+function closePinModal() { UI.closePinModal(); }
+function confirmPin() { UI.confirmPin(); }
+/**
+ * Main Application Logic
+ */
+
+let APP_DATA = null;
+
+// ========== INIT ==========
+document.addEventListener('DOMContentLoaded', () => {
+  setTimeout(initApp, 600);
+});
+
+const INACTIVITY_MS = 15 * 60 * 1000; // 15 minutes
+
+function resetActivity() {
+  Auth.touchActivity();
+}
+
+function initApp() {
+  APP_DATA = DB.load();
+
+  // Ensure 20 members exist
+  if (!APP_DATA.members || APP_DATA.members.length === 0) {
+    APP_DATA.members = Accounting.createDefaultMembers();
+    DB.save(APP_DATA);
+  }
+
+  // Update datetime every 30s
+  UI.updateDateTime();
+  setInterval(UI.updateDateTime, 30000);
+
+  // Inactivity logout (15 min only). Closing app does NOT logout.
+  ['click', 'touchstart', 'keypress', 'scroll'].forEach(evt => {
+    document.addEventListener(evt, resetActivity, { passive: true });
+  });
+  setInterval(() => {
+    if (!Auth.isLoggedIn()) return;
+    const lastAct = parseInt(localStorage.getItem('gs_last_activity') || '0', 10);
+    if (lastAct && (Date.now() - lastAct > INACTIVITY_MS)) {
+      Auth.logout();
+      showLoginScreen();
+      UI.toast('१५ मिनेट निष्क्रिय — लगआउट भयो', 'error');
+    }
+  }, 30000);
+
+  // Session persists across close/reopen unless 15 min idle
+  if (Auth.restoreSession()) {
+    showMainApp();
+  } else {
+    showLoginScreen();
+  }
+
+  document.getElementById('loading-screen').classList.remove('active');
+}
+
+function showLoginScreen() {
+  document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+  document.getElementById('login-screen').classList.add('active');
+
+  const data = DB.load();
+  const createBtn = document.getElementById('create-account-btn');
+  if (data.admin) {
+    createBtn.classList.add('hidden');
+  } else {
+    createBtn.classList.remove('hidden');
+  }
+  backToLoginOptions();
+}
+
+function showMainApp() {
+  document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+  document.getElementById('main-screen').classList.add('active');
+  APP_DATA = DB.load();
+  UI.updateHeader(APP_DATA);
+  UI.updateHome(APP_DATA);
+  renderHomeByRole();
+  switchTab('home');
+  renderProfileTab();
+  renderSettingsTab();
+  renderVidhanTab();
+
+  if (Auth.isAdmin()) {
+    const pending = (APP_DATA.pinRequests || []).filter(r => r.status === 'pending');
+    const unread = (APP_DATA.complaints || []).filter(c => !c.read).length;
+    if (pending.length > 0 || unread > 0) {
+      setTimeout(() => UI.toast(`📩 PIN: ${pending.length} · गुनासो: ${unread}`, 'success'), 500);
+    }
+  } else if (Auth.isMember()) {
+    setTimeout(() => showMemberActivityPopup(), 600);
+  }
+}
+
+function renderHomeByRole() {
+  const adminHome = document.getElementById('home-admin');
+  const memberHome = document.getElementById('home-member');
+  if (Auth.isAdmin()) {
+    adminHome.classList.remove('hidden');
+    memberHome.classList.add('hidden');
+  } else {
+    adminHome.classList.add('hidden');
+    memberHome.classList.remove('hidden');
+    renderMemberHome(memberHome);
+  }
+}
+
+function renderMemberHome(container) {
+  const data = DB.load();
+  const member = data.members.find(m => m.id === Auth.currentUser.memberId);
+  if (!member) { container.innerHTML = '<div class="empty-state">सदस्य भेटिएन</div>'; return; }
+
+  const myAssets = Accounting.memberAssets(data, member);
+
+  // Own collection history
+  let historyHtml = '';
+  const months = (data.months || []).slice().reverse();
+  if (months.length === 0) {
+    historyHtml = '<div class="text-muted text-center">अहिलेसम्म कलेक्सन छैन</div>';
+  } else {
+    historyHtml = '<div class="table-wrap"><table><thead><tr><th>महिना</th><th>जम्मा</th><th>बचत</th><th>ब्याज</th><th>सावा</th><th>ऋण</th></tr></thead><tbody>';
+    months.forEach(mo => {
+      const c = (mo.collections || {})[member.id] || {};
+      const taken = (mo.loansGiven || []).filter(l => l.memberId === member.id).reduce((s, l) => s + l.amount, 0);
+      historyHtml += `<tr>
+        <td>${mo.name}</td>
+        <td>${Accounting.formatNum(c.totalPaid || 0)}</td>
+        <td>${Accounting.formatNum(c.saving || 0)}</td>
+        <td>${Accounting.formatNum(c.interest || 0)}</td>
+        <td>${Accounting.formatNum(c.principal || 0)}</td>
+        <td>${Accounting.formatNum(taken)}</td>
+      </tr>`;
+    });
+    historyHtml += '</tbody></table></div>';
+  }
+
+  container.innerHTML = `
+    <div class="section-card">
+      <div class="fw-bold" style="font-size:1.1rem">${member.name}</div>
+      <div class="text-muted">${member.kitta} कित्ता · सम्पत्ति ${Accounting.formatNum(myAssets)}</div>
+      <div class="mt-1">
+        ${member.outstandingLoan > 0 ? `<span class="member-badge badge-loan">ऋण ${Accounting.formatNum(member.outstandingLoan)}</span> ` : ''}
+        ${member.advance > 0 ? `<span class="member-badge badge-advance">अग्रिम ${Accounting.formatNum(member.advance)}</span>` : ''}
+      </div>
+    </div>
+    <div class="section-card">
+      <div class="section-title">📋 मेरो कलेक्सन इतिहास</div>
+      ${historyHtml}
+    </div>
+    <button class="btn btn-primary btn-block mb-1" onclick="openMemberReports()">📊 मासिक / वार्षिक रिपोर्ट</button>
+    <button class="btn btn-purple btn-block mb-1" onclick="showPassbook('${member.id}')">📖 मेरो पासबुक</button>
+  `;
+}
+
+function openMemberReports() {
+  const html = `
+    <button class="btn btn-primary btn-block mb-1" onclick="showMonthlyReport()">📅 मासिक रिपोर्ट</button>
+    <button class="btn btn-info btn-block mb-1" onclick="showYearlyReport()">📊 वार्षिक रिपोर्ट</button>
+  `;
+  UI.showModal('📊 रिपोर्ट', html, '<button class="btn btn-outline" onclick="closeModal()">बन्द</button>');
+}
+
+function showMemberActivityPopup() {
+  const data = DB.load();
+  const memberId = Auth.currentUser.memberId;
+  const lastLogin = sessionStorage.getItem('gs_last_activity_' + memberId);
+  const activities = [];
+
+  (data.months || []).forEach(mo => {
+    const c = (mo.collections || {})[memberId];
+    if (c && c.time && (!lastLogin || c.time > lastLogin)) {
+      activities.push(`${mo.name}: तिरेको ${Accounting.formatNum(c.totalPaid || 0)}`);
+    }
+    (mo.loansGiven || []).forEach(l => {
+      if (l.memberId === memberId && (!lastLogin || l.time > lastLogin)) {
+        activities.push(`${mo.name}: ऋण लिएको ${Accounting.formatNum(l.amount)}`);
+      }
+    });
+  });
+
+  // Unread complaint replies
+  (data.complaints || []).filter(c => c.memberId === memberId).forEach(c => {
+    (c.replies || []).forEach(r => {
+      if (r.from === 'admin' && (!lastLogin || r.time > lastLogin)) {
+        activities.push('Admin जवाफ: ' + r.text.substring(0, 40));
+      }
+    });
+  });
+
+  sessionStorage.setItem('gs_last_activity_' + memberId, new Date().toISOString());
+
+  if (activities.length === 0) return;
+  const html = '<div class="section-title">🔔 नयाँ गतिविधि</div>' +
+    activities.slice(0, 10).map(a => `<div class="report-row"><span class="label">${a}</span></div>`).join('');
+  UI.showModal('🔔 सूचना', html, '<button class="btn btn-primary" onclick="closeModal()">ठीक छ</button>');
+}
+
+// ========== LOGIN UI ==========
+function backToLoginOptions() {
+  document.getElementById('login-options').classList.remove('hidden');
+  document.getElementById('create-account-form').classList.add('hidden');
+  document.getElementById('admin-login-form').classList.add('hidden');
+  document.getElementById('member-login-form').classList.add('hidden');
+}
+
+function showCreateAccount() {
+  document.getElementById('login-options').classList.add('hidden');
+  document.getElementById('create-account-form').classList.remove('hidden');
+}
+
+function showAdminLogin() {
+  document.getElementById('login-options').classList.add('hidden');
+  document.getElementById('admin-login-form').classList.remove('hidden');
+}
+
+function showMemberLogin() {
+  document.getElementById('login-options').classList.add('hidden');
+  document.getElementById('member-login-form').classList.remove('hidden');
+}
+
+function createAccount() {
+  const name = document.getElementById('ca-name').value.trim();
+  const username = document.getElementById('ca-username').value.trim();
+  const password = document.getElementById('ca-password').value;
+  const password2 = document.getElementById('ca-password2').value;
+  const mobile = document.getElementById('ca-mobile').value.trim();
+  const pin = document.getElementById('ca-pin').value;
+  const pin2 = document.getElementById('ca-pin2').value;
+
+  if (password !== password2) return UI.toast('Password मिल्दैन', 'error');
+  if (pin !== pin2) return UI.toast('PIN मिल्दैन', 'error');
+
+  const res = Auth.createAccount(name, username, password, mobile, pin);
+  if (res.ok) {
+    UI.toast(res.msg, 'success');
+    // Auto login as admin
+    Auth.adminLogin(username, password);
+    showMainApp();
+  } else {
+    UI.toast(res.msg, 'error');
+  }
+}
+
+function adminLogin() {
+  const u = document.getElementById('admin-username').value.trim();
+  const p = document.getElementById('admin-password').value;
+  const res = Auth.adminLogin(u, p);
+  if (res.ok) {
+    showMainApp();
+  } else {
+    UI.toast(res.msg, 'error');
+  }
+}
+
+function memberLogin() {
+  const mobile = document.getElementById('member-mobile').value.trim();
+  const pin = document.getElementById('member-pin').value;
+  const res = Auth.memberLogin(mobile, pin);
+  if (res.ok) {
+    showMainApp();
+  } else {
+    UI.toast(res.msg, 'error');
+  }
+}
+
+function requestPin() {
+  const mobile = document.getElementById('member-mobile').value.trim();
+  if (!mobile) return UI.toast('मोबाइल नम्बर लेख्नुहोस्', 'error');
+  const res = Auth.requestPin(mobile);
+  UI.toast(res.msg, res.ok ? 'success' : 'error');
+}
+
+// ========== TABS ==========
+function switchTab(tab) {
+  document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active'));
+  const btn = document.querySelector(`.nav-btn[data-tab="${tab}"]`);
+  if (btn) btn.classList.add('active');
+  document.querySelectorAll('.tab-pane').forEach(p => p.classList.remove('active'));
+  const pane = document.getElementById('tab-' + tab);
+  if (pane) pane.classList.add('active');
+
+  if (tab === 'profile') renderProfileTab();
+  if (tab === 'settings') renderSettingsTab();
+  if (tab === 'vidhan') renderVidhanTab();
+  if (tab === 'home') {
+    APP_DATA = DB.load();
+    UI.updateHome(APP_DATA);
+    UI.updateHeader(APP_DATA);
+    renderHomeByRole();
+  }
+}
+
+// ========== HOME ACTIONS ==========
+function showAssetsDetail() {
+  const data = DB.load();
+  const month = Accounting.getCurrentMonth(data);
+  const prev = Accounting.getPreviousMonth(data);
+  let html = '<div class="report-card">';
+  if (month) {
+    Accounting.recalcMonth(month, data);
+    html += `
+      <div class="report-row"><span class="label">📅 महिना</span><span class="value">${month.name}</span></div>
+      <div class="report-row"><span class="label">💎 सम्पत्ति (८)</span><span class="value">${Accounting.formatNum(month.finalAssets)}</span></div>
+      <div class="report-row"><span class="label">🤝 लगानी (११)</span><span class="value">${Accounting.formatNum(month.outstandingLoans)}</span></div>
+      <div class="report-row highlight"><span class="label">💵 नगद (१२)</span><span class="value">${Accounting.formatNum(month.cashInHand)}</span></div>
+      <div class="report-row"><span class="label">सुरु मौज्दात</span><span class="value">${Accounting.formatNum(month.startAssets)}</span></div>
+      <div class="report-row"><span class="label">खुद आम्दानी</span><span class="value">${Accounting.formatNum(month.netIncome)}</span></div>
+    `;
+  } else if (prev) {
+    html += `
+      <div class="report-row"><span class="label">अन्तिम बन्द महिना</span><span class="value">${prev.name}</span></div>
+      <div class="report-row"><span class="label">💎 सम्पत्ति</span><span class="value">${Accounting.formatNum(prev.finalAssets)}</span></div>
+      <div class="report-row"><span class="label">🤝 लगानी</span><span class="value">${Accounting.formatNum(prev.outstandingLoans)}</span></div>
+      <div class="report-row highlight"><span class="label">💵 नगद</span><span class="value">${Accounting.formatNum(prev.cashInHand)}</span></div>
+    `;
+  } else {
+    html += '<div class="empty-state">अहिलेसम्म कुनै महिना सुरु भएको छैन</div>';
+  }
+  html += '</div>';
+  UI.showModal('💎 सम्पत्ति विवरण', html, '<button class="btn btn-outline" onclick="closeModal()">बन्द</button>');
+}
+
+function showMembersSummary() {
+  const data = DB.load();
+  const active = data.members.filter(m => m.active);
+  const html = `
+    <div class="report-card mb-2">
+      <div class="report-row"><span class="label">👥 जम्मा सदस्य</span><span class="value">${Accounting.totalMembers(data)}</span></div>
+      <div class="report-row"><span class="label">🎫 जम्मा कित्ता</span><span class="value">${Accounting.totalKitta(data)}</span></div>
+      <div class="report-row highlight"><span class="label">💰 प्रति कित्ता मूल्य</span><span class="value">${Accounting.formatNum(
+        (() => {
+          const m = Accounting.getCurrentMonth(data) || Accounting.getPreviousMonth(data);
+          if (!m) {
+            if (data.migrationDone) {
+              const loans = Object.values(data.migration.loans||{}).reduce((s,v)=>s+v,0);
+              const assets = (data.migration.cash||0) + loans;
+              const k = Accounting.totalKitta(data);
+              return k > 0 ? Math.round(assets / k) : 0;
+            }
+            return 0;
+          }
+          return Accounting.perKittaValue(data, m);
+        })()
+      )}</span></div>
+    </div>
+    <div class="section-title">सदस्य सूची</div>
+    ${UI.renderMemberList(active, 'viewMemberFromHome')}
+  `;
+  UI.showModal('👥 सदस्य सारांश', html, '<button class="btn btn-outline" onclick="closeModal()">बन्द</button>');
+}
+
+function viewMemberFromHome(id) {
+  closeModal();
+  switchTab('profile');
+  setTimeout(() => openMemberDetail(id), 200);
+}
+
+// ========== COLLECTION ==========
+function openCollection() {
+  if (!Auth.isAdmin()) return UI.toast('Admin मात्र कलेक्सन गर्न सक्नुहुन्छ', 'error');
+  const data = DB.load();
+  let month = Accounting.getCurrentMonth(data);
+  let html = '';
+
+  if (!month) {
+    html = `
+      <div class="empty-state">
+        <div class="icon">📅</div>
+        <p>कुनै महिना खुल्ला छैन</p>
+        <button class="btn btn-primary btn-block mt-2" onclick="startNewMonth()">▶️ नयाँ महिना सुरु गर्नुहोस्</button>
+      </div>
+    `;
+  } else {
+    Accounting.recalcMonth(month, data);
+    const collected = Object.keys(month.collections || {}).length;
+    const total = data.members.filter(m => m.active).length;
+
+    html = `
+      <div class="collection-header">
+        <div class="stat-pill"><div class="num">${month.name}</div><div class="lbl">महिना</div></div>
+        <div class="stat-pill"><div class="num">${collected}/${total}</div><div class="lbl">कलेक्सन</div></div>
+        <div class="stat-pill"><div class="num">${month.status === 'open' ? '🟢 खुल्ला' : month.status === 'collection_closed' ? '🟡 बन्द' : '🔴 सकियो'}</div><div class="lbl">स्थिति</div></div>
+      </div>
+      <div class="report-card mb-2">
+        <div class="report-row"><span class="label">सुरु मौज्दात</span><span class="value fw-bold">${Accounting.formatNum(month.startAssets)}</span></div>
+        <div class="report-row"><span class="label">अन्तिम मौज्दात</span><span class="value">${Accounting.formatNum(month.finalAssets)}</span></div>
+      </div>
+    `;
+
+    if (month.status === 'open') {
+      html += `
+        <button class="btn btn-success btn-block mb-1" onclick="showCollectMember()">📥 कलेक्सन गर्नुहोस्</button>
+        <button class="btn btn-danger btn-block mb-1" onclick="showExpenseForm()">💸 खर्च लेख्नुहोस्</button>
+        <button class="btn btn-primary btn-block mb-1" onclick="showOtherIncomeForm()">💰 अन्य आम्दानी</button>
+        <button class="btn btn-warning btn-block mb-1" onclick="doCloseCollection()">🔒 कलेक्सन बन्द गर्नुहोस्</button>
+      `;
+    } else if (month.status === 'collection_closed') {
+      html += `<div class="text-center text-muted mb-2">कलेक्सन बन्द भयो। अब क्रम:
+        <br>१. कित्ता/सदस्य परिवर्तन (प्रोफाइल)
+        <br>२. ऋण लगानी
+        <br>३. महिना बन्द</div>
+        <button class="btn btn-danger btn-block mb-1" onclick="showExpenseForm()">💸 खर्च लेख्नुहोस्</button>
+        <button class="btn btn-primary btn-block mb-1" onclick="showOtherIncomeForm()">💰 अन्य आम्दानी</button>
+        <button class="btn btn-orange btn-block mb-1" onclick="closeModal(); openLoans();">🤝 ऋण लगानीमा जानुहोस्</button>
+        <button class="btn btn-danger btn-block mb-1" onclick="doCloseMonth()">🔒 महिना बन्द गर्नुहोस्</button>`;
+    }
+  }
+
+  UI.showModal('📥 मासिक कलेक्सन', html, '<button class="btn btn-outline" onclick="closeModal()">बन्द</button>', { root: true });
+}
+
+function confirmReopenMonth() {
+  UI.toast('बन्द महिना खोल्ने सुविधा हटाइएको छ (दोहोरो entry रोक्न)', 'error');
+}
+
+function doReopenMonth() {
+  UI.toast('बन्द महिना खोल्ने सुविधा हटाइएको छ', 'error');
+}
+
+function fixStartAssets() {
+  UI.showPinModal('सबै महिना: सुरु = अघिल्लो अन्तिम · एउटै नियम (PIN)', () => {
+    const data = DB.load();
+    Accounting.rebuildMonthChain(data);
+    DB.save(data);
+    UI.updateHome(data);
+    const cur = Accounting.getCurrentMonth(data);
+    const msg = cur
+      ? (cur.name + ' सुरु मौज्दात: ' + Accounting.formatNum(cur.startAssets))
+      : 'सबै महिनाको शृंखला मिल्यो';
+    UI.toast(msg, 'success');
+    openCollection();
+  });
+}
+
+function startNewMonth() {
+  const data = DB.load();
+  if (data.currentMonthId) {
+    return UI.toast('पहिले हालको महिना बन्द गर्नुहोस्', 'error');
+  }
+  UI.showPinModal('⚠️ नयाँ महिना सुरु गर्न PIN चाहिन्छ', () => {
+    _doStartNewMonth();
+  });
+}
+
+function _doStartNewMonth() {
+  const data = DB.load();
+  let monthIndex = 0;
+  let yearBS = 2082;
+  const closed = Accounting.getClosedMonthsSorted(data);
+  if (closed.length > 0) {
+    const last = closed[closed.length - 1];
+    // Ensure last month finalAssets is correct before chaining
+    Accounting.recalcMonth(last, data);
+    monthIndex = (last.monthIndex + 1) % 12;
+    yearBS = last.yearBS;
+    if (monthIndex === 0) yearBS++;
+  } else {
+    const now = new Date();
+    yearBS = now.getFullYear() + 57;
+    monthIndex = 0;
+  }
+
+  const month = Accounting.createMonth(data, monthIndex, yearBS);
+  data.months.push(month);
+  data.currentMonthId = month.id;
+
+  if (closed.length === 0 && data.migrationDone) {
+    Accounting.applyMigration(data);
+  }
+
+  // Ensure chain: this month start = previous final
+  Accounting.rebuildMonthChain(data);
+
+  DB.save(data);
+  UI.updateHome(data);
+  UI.toast(month.name + ' सुरु · मौज्दात ' + Accounting.formatNum(month.startAssets), 'success');
+  closeModal();
+  UI.updateHeader(data);
+  openCollection();
+}
+
+function renderCollectStatusList(members, month) {
+  const data = DB.load();
+  return members.map(m => {
+    const c = month.collections[m.id];
+    const man = Accounting.calcMandatory(m, data, month);
+    let status;
+    if (c) {
+      status = `<span style="color:#198754;font-weight:700">✅ ${Accounting.formatNum(c.totalPaid)}</span>`;
+    } else if (man.total === 0 && man.advanceCover > 0) {
+      status = `<span style="color:#0d6efd">अग्रिमले पुग्छ</span>`;
+    } else {
+      status = `<span style="color:#dc3545">💵 ${Accounting.formatNum(man.total)}</span>`;
+    }
+    return `<div class="member-item" onclick="selectCollectMember('${m.id}')">
+      <div class="member-avatar">${m.name.charAt(0)}</div>
+      <div class="member-info"><div class="member-name">${m.name}</div>
+      <div class="member-meta">${m.kitta} कित्ता${man.previousDue > 0 ? ' · बाँकी ' + Accounting.formatNum(man.previousDue) : ''}${man.advance > 0 ? ' · अग्रिम ' + Accounting.formatNum(man.advance) : ''}</div></div>
+      <div style="text-align:right;font-size:0.85rem">${status}</div>
+    </div>`;
+  }).join('');
+}
+
+function showCollectMember(preselectId) {
+  const data = DB.load();
+  const month = Accounting.getCurrentMonth(data);
+  if (!month || month.status !== 'open') {
+    return UI.toast('कलेक्सन खुल्ला छैन', 'error');
+  }
+
+  const active = data.members.filter(m => m.active);
+  let opts = '<option value="">— सदस्य छान्नुहोस् —</option>';
+  let legend = `<div style="font-size:0.75rem;margin-bottom:8px;display:flex;gap:10px;flex-wrap:wrap">
+    <span style="color:#0d6efd;font-weight:700">● बचत भइसकेको</span>
+    <span style="color:#e6a800;font-weight:700">● अग्रिमले पुग्छ</span>
+    <span style="color:#dc3545;font-weight:700">● बाँकी / तिर्नुपर्ने</span>
+  </div>`;
+  active.forEach(m => {
+    const c = month.collections[m.id];
+    const man = Accounting.calcMandatory(m, data, month);
+    let color, tag;
+    if (c) {
+      color = '#0d6efd';
+      tag = ' ✅ ' + Accounting.formatNum(c.totalPaid);
+    } else if (man.total === 0 && man.advanceCover > 0) {
+      color = '#e6a800';
+      tag = ' ⚡ अग्रिमले पुग्छ';
+    } else {
+      color = '#dc3545';
+      tag = ' · तिर्नुपर्ने ' + Accounting.formatNum(man.total);
+    }
+    opts += `<option value="${m.id}" style="color:${color};font-weight:600">${m.name} (${m.kitta} कित्ता)${tag}</option>`;
+  });
+
+  let html = `
+    <button class="btn btn-danger btn-block mb-1" onclick="showExpenseForm()">💸 खर्च लेख्नुहोस्</button>
+    <button class="btn btn-primary btn-block mb-1" onclick="showOtherIncomeForm()">💰 अन्य आम्दानी</button>
+    <hr style="margin:12px 0;border:none;border-top:1px solid #e0e0e0">
+    ${legend}
+    <div class="form-group">
+      <label>👤 सदस्य खोज्नुहोस् / छान्नुहोस्</label>
+      <input type="text" id="collect-search" placeholder="नाम टाइप गर्नुहोस्..." oninput="filterCollectDropdown()" style="margin-bottom:6px">
+      <select id="collect-member-select" size="8" style="width:100%;font-size:0.95rem;padding:6px" onchange="onCollectMemberPick()">
+        ${opts}
+      </select>
+    </div>
+    <div id="collect-pick-hint" class="text-muted text-center" style="font-size:0.85rem">सदस्य छानेपछि कलेक्सन फारम खुल्छ</div>
+  `;
+  UI.showModal('📥 कलेक्सन गर्नुहोस्', html, '<button class="btn btn-outline" onclick="openCollection()">← फर्कनुहोस्</button>');
+
+  if (preselectId) {
+    setTimeout(() => {
+      const sel = document.getElementById('collect-member-select');
+      if (sel) { sel.value = preselectId; selectCollectMember(preselectId); }
+    }, 100);
+  }
+}
+
+function filterCollectDropdown() {
+  const q = (document.getElementById('collect-search').value || '').trim().toLowerCase();
+  const sel = document.getElementById('collect-member-select');
+  if (!sel) return;
+  Array.from(sel.options).forEach((opt, i) => {
+    if (i === 0) { opt.hidden = false; return; }
+    opt.hidden = q && !opt.text.toLowerCase().includes(q);
+  });
+}
+
+function onCollectMemberPick() {
+  const id = document.getElementById('collect-member-select').value;
+  if (id) selectCollectMember(id);
+}
+
+function showExpenseForm() {
+  const data = DB.load();
+  const month = Accounting.getCurrentMonth(data);
+  if (!month || month.status === 'closed') return UI.toast('महिना बन्द भइसक्यो', 'error');
+
+  const list = (month.expenseDetails || []).map(d =>
+    `<div class="report-row"><span class="label">${d.note || d.type || 'खर्च'}</span><span class="value" style="color:#dc3545">− ${Accounting.formatNum(d.amount)}</span></div>`
+  ).join('') || '<div class="text-muted text-center">अहिलेसम्म खर्च छैन</div>';
+
+  const html = `
+    <div class="section-title">💸 खर्च · ${month.name}</div>
+    <div class="report-card mb-2">${list}</div>
+    <div class="form-group"><label>रकम</label><input type="number" id="exp-amount" placeholder="खर्च रकम"></div>
+    <div class="form-group"><label>कैफियत / कारण</label><input type="text" id="exp-note" placeholder="जस्तै: चिया, भाडा, स्टेशनरी"></div>
+    <p class="text-muted" style="font-size:0.8rem">असर: नगद घट्छ · मौज्दात घट्छ · रिपोर्ट ६. खर्च बढ्छ</p>
+    <button class="btn btn-danger btn-block" onclick="saveExpense()">✅ खर्च सेभ (PIN)</button>
+  `;
+  UI.showModal('💸 खर्च', html, '<button class="btn btn-outline" onclick="openCollection()">← फर्कनुहोस्</button>');
+}
+
+function saveExpense() {
+  const amount = parseFloat(document.getElementById('exp-amount').value) || 0;
+  const note = (document.getElementById('exp-note').value || '').trim();
+  if (amount <= 0) return UI.toast('रकम लेख्नुहोस्', 'error');
+  if (!note) return UI.toast('कैफियत लेख्नुहोस्', 'error');
+
+  UI.showPinModal('खर्च रु. ' + Accounting.formatNum(amount) + ' सेभ गर्न PIN', () => {
+    const data = DB.load();
+    const month = Accounting.getCurrentMonth(data);
+    if (!month || month.status === 'closed') return UI.toast('महिना बन्द', 'error');
+    month.expenseDetails = month.expenseDetails || [];
+    month.expenseDetails.push({
+      type: 'general',
+      amount,
+      note,
+      time: new Date().toISOString()
+    });
+    Accounting.recalcMonth(month, data);
+    DB.save(data);
+    UI.updateHome(data);
+    UI.toast('खर्च सेभ · मौज्दात/नगद घट्यो', 'success');
+    showExpenseForm();
+  });
+}
+
+function showOtherIncomeForm() {
+  const data = DB.load();
+  const month = Accounting.getCurrentMonth(data);
+  if (!month || month.status === 'closed') return UI.toast('महिना बन्द भइसक्यो', 'error');
+
+  const list = (month.otherIncomeDetails || []).map(d =>
+    `<div class="report-row"><span class="label">${d.note || d.type || 'अन्य'}</span><span class="value" style="color:#198754">+ ${Accounting.formatNum(d.amount)}</span></div>`
+  ).join('') || '<div class="text-muted text-center">अहिलेसम्म अन्य आम्दानी छैन</div>';
+
+  const html = `
+    <div class="section-title">💰 अन्य आम्दानी · ${month.name}</div>
+    <div class="report-card mb-2">${list}</div>
+    <div class="form-group"><label>रकम</label><input type="number" id="oi-amount" placeholder="आम्दानी रकम"></div>
+    <div class="form-group"><label>कैफियत / स्रोत</label><input type="text" id="oi-note" placeholder="जस्तै: दान, अतिरिक्त..."></div>
+    <p class="text-muted" style="font-size:0.8rem">असर: नगद बढ्छ · मौज्दात बढ्छ · रिपोर्ट ४. अन्य आम्दानी बढ्छ</p>
+    <button class="btn btn-primary btn-block" onclick="saveOtherIncome()">✅ आम्दानी सेभ (PIN)</button>
+  `;
+  UI.showModal('💰 अन्य आम्दानी', html, '<button class="btn btn-outline" onclick="openCollection()">← फर्कनुहोस्</button>');
+}
+
+function saveOtherIncome() {
+  const amount = parseFloat(document.getElementById('oi-amount').value) || 0;
+  const note = (document.getElementById('oi-note').value || '').trim();
+  if (amount <= 0) return UI.toast('रकम लेख्नुहोस्', 'error');
+  if (!note) return UI.toast('कैफियत लेख्नुहोस्', 'error');
+
+  UI.showPinModal('अन्य आम्दानी रु. ' + Accounting.formatNum(amount) + ' सेभ गर्न PIN', () => {
+    const data = DB.load();
+    const month = Accounting.getCurrentMonth(data);
+    if (!month || month.status === 'closed') return UI.toast('महिना बन्द', 'error');
+    month.otherIncomeDetails = month.otherIncomeDetails || [];
+    month.otherIncomeDetails.push({
+      type: 'general',
+      amount,
+      note,
+      time: new Date().toISOString()
+    });
+    Accounting.recalcMonth(month, data);
+    DB.save(data);
+    UI.updateHome(data);
+    UI.toast('आम्दानी सेभ · मौज्दात/नगद बढ्यो', 'success');
+    showOtherIncomeForm();
+  });
+}
+
+function filterCollectList() {
+  const q = (document.getElementById('collect-search').value || '').trim().toLowerCase();
+  const data = DB.load();
+  const month = Accounting.getCurrentMonth(data);
+  const filtered = data.members.filter(m => m.active && m.name.toLowerCase().includes(q));
+  document.getElementById('collect-member-list').innerHTML = renderCollectStatusList(filtered, month);
+}
+
+function selectCollectMember(memberId) {
+  const data = DB.load();
+  const month = Accounting.getCurrentMonth(data);
+  const member = data.members.find(m => m.id === memberId);
+  if (!member) return;
+
+  const mandatory = Accounting.calcMandatory(member, data, month);
+  const already = month.collections[memberId];
+
+  let html = `
+    <div class="section-title">${member.name} · ${member.kitta} कित्ता</div>
+    <div class="pay-summary">
+      <div class="pay-row"><span>💾 बचत</span><span class="amount">${Accounting.formatNum(mandatory.saving)}</span></div>
+      <div class="pay-row"><span>📈 ब्याज</span><span class="amount">${Accounting.formatNum(mandatory.interest)}</span></div>
+      <div class="pay-row"><span>⚠️ जरिवाना</span><span class="amount">${Accounting.formatNum(mandatory.fine)}</span></div>
+      <div class="pay-row"><span>📉 अघिल्लो बाँकी</span><span class="amount" style="color:${mandatory.previousDue > 0 ? '#dc3545' : ''}">${Accounting.formatNum(mandatory.previousDue)}</span></div>
+      <div class="pay-row"><span>जम्मा (अग्रिम अघि)</span><span class="amount">${Accounting.formatNum(mandatory.totalGross)}</span></div>
+      <div class="pay-row"><span>💚 अग्रिम कट्टा</span><span class="amount" style="color:#0d6efd">− ${Accounting.formatNum(mandatory.advanceCover)}</span></div>
+      <div class="pay-row total"><span>💵 नगद तिर्नुपर्ने</span><span class="amount" style="color:#0d6efd">${Accounting.formatNum(mandatory.total)}</span></div>
+      <div class="pay-row"><span>🤝 बाँकी ऋण</span><span class="amount" style="color:${(member.outstandingLoan||0) > 0 ? '#dc3545' : ''}">${Accounting.formatNum(member.outstandingLoan || 0)}</span></div>
+      <div class="pay-row"><span>💚 बाँकी अग्रिम</span><span class="amount" style="color:#0d6efd">${Accounting.formatNum(member.advance || 0)}</span></div>
+    </div>
+  `;
+
+  if (already) {
+    html += `<div class="text-success mb-2">✅ पहिले नै नगद रु. ${Accounting.formatNum(already.totalPaid)} उठाइसकिएको
+      ${(already.fromAdvance || 0) > 0 ? ' · अग्रिमबाट ' + Accounting.formatNum(already.fromAdvance) : ''}</div>`;
+    html += `<button class="btn btn-danger btn-block mb-1" onclick="removeCollection('${memberId}')">🗑️ कलेक्सन हटाउनुहोस्</button>`;
+  }
+
+  const defaultAmt = already ? already.totalPaid : mandatory.total;
+  html += `
+    <div class="form-group">
+      <label>💵 यो पटक तिरेको नगद रकम</label>
+      <input type="number" id="pay-amount" placeholder="नगद रकम" value="${defaultAmt}">
+      <div class="text-muted" style="font-size:0.8rem;margin-top:4px">अग्रिम स्वतः कट्टा हुन्छ · 0 लेखे कलेक्सन रद्द</div>
+    </div>
+    <button class="btn btn-success btn-block" onclick="saveCollection('${memberId}')">✅ बचत गर्नुहोस्</button>
+  `;
+
+  UI.showModal('📥 कलेक्सन - ' + member.name, html, '<button class="btn btn-outline" onclick="showCollectMember()">← फर्कनुहोस्</button>');
+}
+
+function saveCollection(memberId) {
+  const amount = parseFloat(document.getElementById('pay-amount').value) || 0;
+  if (amount < 0) return UI.toast('रकम गलत', 'error');
+
+  const data = DB.load();
+  const month = Accounting.getCurrentMonth(data);
+  if (!month || month.status !== 'open') return UI.toast('कलेक्सन बन्द भइसक्यो', 'error');
+
+  if (amount === 0) {
+    delete month.collections[memberId];
+    Accounting.recalcMonth(month, data);
+    DB.save(data);
+    UI.updateHome(data);
+    UI.toast('कलेक्सन रद्द भयो', 'success');
+    showCollectMember();
+    return;
+  }
+
+  const member = data.members.find(m => m.id === memberId);
+  const mandatory = Accounting.calcMandatory(member, data, month);
+  const hasLoan = (member.outstandingLoan || 0) > 0;
+
+  const allocMandatory = {
+    saving: mandatory.saving,
+    interest: mandatory.interest,
+    fine: mandatory.fine,
+    previousDue: mandatory.previousDue,
+    total: mandatory.totalGross
+  };
+  // अग्रिम पहिले कट्टा, बाँकी नगदले
+  const allocated = Accounting.allocatePayment(
+    member, amount, allocMandatory, hasLoan, mandatory.advanceCover
+  );
+  if (mandatory.advanceCover > 0) allocated.coveredByAdvance = true;
+  month.collections[memberId] = { ...allocated, time: new Date().toISOString() };
+
+  Accounting.recalcMonth(month, data);
+  DB.save(data);
+  UI.updateHome(data); // entry सँगै होम अपडेट
+  UI.toast('कलेक्सन सेभ भयो', 'success');
+  showCollectMember();
+}
+
+function removeCollection(memberId) {
+  const data = DB.load();
+  const month = Accounting.getCurrentMonth(data);
+  if (!month || month.status !== 'open') return UI.toast('कलेक्सन बन्द भइसक्यो', 'error');
+  delete month.collections[memberId];
+  Accounting.recalcMonth(month, data);
+  DB.save(data);
+  UI.updateHome(data);
+  UI.toast('कलेक्सन हटाइयो', 'success');
+  showCollectMember();
+}
+
+function doCloseCollection() {
+  UI.showPinModal('⚠️ कलेक्सन बन्द गर्न PIN चाहिन्छ। नतिरेका सदस्यको रकम बाँकीमा जान्छ र पछि edit हुँदैन!', () => {
+    const data = DB.load();
+    const month = Accounting.getCurrentMonth(data);
+    Accounting.closeCollection(data, month);
+    DB.save(data);
+    UI.toast('कलेक्सन बन्द भयो', 'success');
+    UI.updateHeader(data);
+    openCollection();
+  });
+}
+
+// ========== LOANS ==========
+function openLoans() {
+  if (!Auth.isAdmin()) return UI.toast('Admin मात्र ऋण व्यवस्थापन गर्न सक्नुहुन्छ', 'error');
+  const data = DB.load();
+  const month = Accounting.getCurrentMonth(data);
+
+  let html = '';
+
+  // New loan at top
+  if (month && month.status === 'collection_closed') {
+    html += `<button class="btn btn-orange btn-block mb-2" onclick="showGiveLoan()">➕ नयाँ ऋण लगानी गर्नुहोस्</button>`;
+  } else if (month && month.status === 'open') {
+    html += `<div class="text-muted text-center mb-2">कलेक्सन बन्द भएपछि मात्र ऋण दिन सकिन्छ</div>`;
+  } else if (month && month.status === 'closed') {
+    html += `<div class="text-muted text-center mb-2">यो महिना बन्द भइसक्यो</div>`;
+  } else {
+    html += `<div class="text-muted text-center mb-2">पहिले महिना सुरु र कलेक्सन बन्द गर्नुहोस्</div>`;
+  }
+
+  // Outstanding list
+  html += '<div class="section-title">📋 उठ्न बाँकी ऋण सूची</div>';
+  const withLoan = data.members.filter(m => m.active && (m.outstandingLoan || 0) > 0);
+  if (withLoan.length === 0) {
+    html += '<div class="empty-state"><div class="icon">✅</div>कुनै बाँकी ऋण छैन</div>';
+  } else {
+    let total = 0;
+    html += withLoan.map(m => {
+      total += m.outstandingLoan;
+      return `<div class="member-item">
+        <div class="member-avatar">${m.name.charAt(0)}</div>
+        <div class="member-info">
+          <div class="member-name">${m.name}</div>
+          <div class="member-meta">${m.kitta} कित्ता</div>
+        </div>
+        <div class="fw-bold text-danger">${Accounting.formatNum(m.outstandingLoan)}</div>
+      </div>`;
+    }).join('');
+    html += `<div class="report-row highlight mt-2"><span class="label">जम्मा उठ्न बाँकी</span><span class="value">${Accounting.formatNum(total)}</span></div>`;
+  }
+
+  // This month's loans
+  if (month && month.loansGiven && month.loansGiven.length) {
+    html += '<div class="section-title mt-2">यस महिना दिइएका ऋण</div>';
+    month.loansGiven.forEach(l => {
+      const m = data.members.find(x => x.id === l.memberId);
+      html += `<div class="member-item">
+        <div class="member-info"><div class="member-name">${m ? m.name : l.memberId}</div>
+        <div class="member-meta">${new Date(l.time).toLocaleString('ne-NP')}</div></div>
+        <div class="fw-bold">${Accounting.formatNum(l.amount)}</div>
+      </div>`;
+    });
+  }
+
+  // Close month button
+  if (month && month.status === 'collection_closed') {
+    html += `<button class="btn btn-danger btn-block mt-2" onclick="doCloseMonth()">🔒 महिना बन्द गर्नुहोस्</button>`;
+  }
+
+  UI.showModal('🤝 ऋण तथा लगानी', html, '<button class="btn btn-outline" onclick="closeModal()">बन्द</button>', { root: true });
+}
+
+function showGiveLoan() {
+  const data = DB.load();
+  const active = data.members.filter(m => m.active);
+  const html = `
+    <div class="search-box">
+      <input type="text" id="loan-search" placeholder="नाम खोज्नुहोस्..." oninput="filterLoanList()">
+    </div>
+    <div id="loan-member-list">
+      ${UI.renderMemberList(active, 'selectLoanMember')}
+    </div>
+  `;
+  UI.showModal('🤝 ऋण दिने सदस्य', html, '<button class="btn btn-outline" onclick="openLoans()">← फर्कनुहोस्</button>');
+}
+
+function filterLoanList() {
+  const q = (document.getElementById('loan-search').value || '').trim().toLowerCase();
+  const data = DB.load();
+  const filtered = data.members.filter(m => m.active && m.name.toLowerCase().includes(q));
+  document.getElementById('loan-member-list').innerHTML = UI.renderMemberList(filtered, 'selectLoanMember');
+}
+
+function selectLoanMember(memberId) {
+  const data = DB.load();
+  const member = data.members.find(m => m.id === memberId);
+  const html = `
+    <div class="section-title">${member.name}</div>
+    <div class="form-group">
+      <label>💵 ऋण रकम</label>
+      <input type="number" id="loan-amount" placeholder="रकम">
+    </div>
+    <div class="form-group">
+      <label>✍️ सदस्यको सहि (अनिवार्य)</label>
+      <div class="sig-pad-wrap">
+        <canvas id="sig-canvas" width="320" height="160"></canvas>
+      </div>
+      <div class="sig-actions">
+        <button class="btn btn-light btn-sm" onclick="clearSignature()">🗑️ मेट्नुहोस्</button>
+      </div>
+    </div>
+    <button class="btn btn-orange btn-block" onclick="saveLoan('${memberId}')">✅ ऋण लगानी गर्नुहोस्</button>
+  `;
+  UI.showModal('🤝 ऋण - ' + member.name, html, '<button class="btn btn-outline" onclick="showGiveLoan()">← फर्कनुहोस्</button>');
+  initSignaturePad();
+}
+
+let sigPad = null;
+function initSignaturePad() {
+  const canvas = document.getElementById('sig-canvas');
+  if (!canvas) return;
+  const ctx = canvas.getContext('2d');
+  ctx.strokeStyle = '#000';
+  ctx.lineWidth = 2;
+  ctx.lineCap = 'round';
+  let drawing = false;
+
+  function pos(e) {
+    const rect = canvas.getBoundingClientRect();
+    const scaleX = canvas.width / rect.width;
+    const scaleY = canvas.height / rect.height;
+    const clientX = e.touches ? e.touches[0].clientX : e.clientX;
+    const clientY = e.touches ? e.touches[0].clientY : e.clientY;
+    return { x: (clientX - rect.left) * scaleX, y: (clientY - rect.top) * scaleY };
+  }
+
+  function start(e) { e.preventDefault(); drawing = true; const p = pos(e); ctx.beginPath(); ctx.moveTo(p.x, p.y); }
+  function move(e) { e.preventDefault(); if (!drawing) return; const p = pos(e); ctx.lineTo(p.x, p.y); ctx.stroke(); }
+  function end() { drawing = false; }
+
+  canvas.addEventListener('mousedown', start);
+  canvas.addEventListener('mousemove', move);
+  canvas.addEventListener('mouseup', end);
+  canvas.addEventListener('mouseleave', end);
+  canvas.addEventListener('touchstart', start, { passive: false });
+  canvas.addEventListener('touchmove', move, { passive: false });
+  canvas.addEventListener('touchend', end);
+
+  sigPad = { canvas, ctx, hasDrawn: false };
+  canvas.addEventListener('mousedown', () => { if (sigPad) sigPad.hasDrawn = true; });
+  canvas.addEventListener('touchstart', () => { if (sigPad) sigPad.hasDrawn = true; });
+}
+
+function clearSignature() {
+  if (!sigPad) return;
+  sigPad.ctx.clearRect(0, 0, sigPad.canvas.width, sigPad.canvas.height);
+  sigPad.hasDrawn = false;
+}
+
+function saveLoan(memberId) {
+  const amount = parseFloat(document.getElementById('loan-amount').value) || 0;
+  if (amount <= 0) return UI.toast('रकम लेख्नुहोस्', 'error');
+  if (!sigPad || !sigPad.hasDrawn) return UI.toast('सहि अनिवार्य छ', 'error');
+
+  const signature = sigPad.canvas.toDataURL('image/png');
+  UI.showPinModal('⚠️ ऋण लगानी गर्न PIN चाहिन्छ। रकम: ' + amount, () => {
+    const data = DB.load();
+    const month = Accounting.getCurrentMonth(data);
+    const member = data.members.find(m => m.id === memberId);
+    Accounting.recalcMonth(month, data);
+    if (amount > month.cashInHand) {
+      return UI.toast('नगद पर्याप्त छैन (उपलब्ध: ' + Accounting.formatNum(month.cashInHand) + ')', 'error');
+    }
+    month.loansGiven.push({ memberId, amount, signature, time: new Date().toISOString() });
+    member.outstandingLoan = (member.outstandingLoan || 0) + amount;
+    Accounting.recalcMonth(month, data);
+    DB.save(data);
+    UI.toast('ऋण लगानी भयो', 'success');
+    openLoans();
+  });
+}
+
+function doCloseMonth() {
+  UI.showPinModal('⚠️ महिना बन्द गरेपछि यो महिनाको हिसाब सच्याउन मिल्दैन!', () => {
+    const data = DB.load();
+    const month = Accounting.getCurrentMonth(data);
+    Accounting.closeMonth(data, month);
+    DB.save(data);
+    UI.toast(month.name + ' बन्द भयो', 'success');
+    UI.updateHeader(data);
+    UI.updateHome(data);
+    closeModal();
+  });
+}
+
+// ========== REPORTS ==========
+function openReports() {
+  const html = `
+    <button class="btn btn-primary btn-block mb-1" onclick="showMonthlyReport()">📅 मासिक रिपोर्ट</button>
+    <button class="btn btn-success btn-block mb-1" onclick="showCollectionSummary()">📋 कलेक्सन सारांश</button>
+    <button class="btn btn-info btn-block mb-1" onclick="showYearlyReport()">📊 वार्षिक रिपोर्ट</button>
+  `;
+  UI.showModal('📊 हिसाब तथा रिपोर्ट', html, '<button class="btn btn-outline" onclick="closeModal()">बन्द</button>', { root: true });
+}
+
+function showMonthlyReport() {
+  const data = DB.load();
+  const months = data.months.filter(m => m.status === 'closed' || m.id === data.currentMonthId);
+  if (months.length === 0) {
+    return UI.toast('कुनै रिपोर्ट उपलब्ध छैन', 'error');
+  }
+
+  let html = '<div class="form-group"><label>महिना छान्नुहोस्</label><select id="report-month" onchange="renderSelectedMonthly()">';
+  months.slice().reverse().forEach(m => {
+    html += `<option value="${m.id}">${m.name} (${m.status})</option>`;
+  });
+  html += '</select></div><div id="monthly-report-body"></div>';
+  html += '<button class="btn btn-primary btn-block mt-2" onclick="printReportImage(\'monthly-report-body\')">🖨️ इमेज प्रिन्ट</button>';
+
+  // Member: ask complaint when closing after viewing
+  if (Auth.isMember()) {
+    _askComplaintOnClose = { memberId: Auth.currentUser.memberId, source: 'मासिक रिपोर्ट' };
+    UI.showModal('📅 मासिक रिपोर्ट', html, '<button class="btn btn-outline" onclick="closeModal()">बन्द</button>');
+  } else {
+    _askComplaintOnClose = null;
+    UI.showModal('📅 मासिक रिपोर्ट', html, '<button class="btn btn-outline" onclick="openReports()">← फर्कनुहोस्</button>');
+  }
+  renderSelectedMonthly();
+}
+
+function fmtDateOnly(iso) {
+  if (!iso) return '-';
+  return new Date(iso).toLocaleDateString('en-GB');
+}
+function fmtTimeOnly(iso) {
+  if (!iso) return '-';
+  return new Date(iso).toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit' });
+}
+
+function renderSelectedMonthly() {
+  const id = document.getElementById('report-month').value;
+  const data = DB.load();
+  if (data.migrationDone) Accounting.syncOpenMonthFromMigration(data);
+  const month = data.months.find(m => m.id === id);
+  if (!month) return;
+  Accounting.recalcMonth(month, data);
+  const perKitta = Accounting.perKittaValue(data, month);
+
+  const advCash = month.advanceFromCash || 0;
+  const otherBase = month.otherIncome || 0;
+  const otherTotal = otherBase + advCash;
+  const totalIncome = (month.savingsCollected || 0) + (month.interestCollected || 0) + otherTotal;
+  const netIncome = totalIncome - (month.expenses || 0);
+
+  // detailKey: which rows open detail view
+  const rows = [
+    { label: '१. सुरु मौज्दात', val: month.startAssets },
+    { label: '२. प्राप्त बचत', val: month.savingsCollected, detail: 'saving' },
+    { label: '३. प्राप्त ब्याज', val: month.interestCollected, detail: 'interest' },
+    { label: '४. अन्य आम्दानी', val: otherTotal, detail: 'other' },
+    { label: '५. जम्मा आम्दानी', val: totalIncome },
+    { label: '६. खर्च', val: month.expenses, detail: 'expense' },
+    { label: '७. खुद आम्दानी', val: netIncome, hl: true },
+    { label: '८. अन्तिम मौज्दात', val: month.finalAssets },
+    { label: '९. उठेको सावा', val: month.principalCollected, detail: 'principal' },
+    { label: '१०. गरिएको लगानी', val: month.newLoansGiven, detail: 'loans' },
+    { label: '११. उठ्न बाँकी लगानी', val: month.outstandingLoans, red: true },
+    { label: '१२. कोसमा नगद', val: month.cashInHand },
+    { label: '१३. जम्मा सदस्य', val: month.totalMembers },
+    { label: '१४. जम्मा कित्ता', val: month.totalKitta },
+    { label: 'प्रति कित्ता मूल्य', val: perKitta, hl: true }
+  ];
+
+  let html = `<div class="print-area" id="print-monthly"><h2>${data.group.name}</h2>
+    <div class="print-meta">${month.name} · मासिक रिपोर्ट</div>
+    <div class="print-meta" style="font-size:0.8rem">${fmtDateOnly(month.collectionClosedAt || month.closedAt)}</div>
+    <div class="print-meta" style="font-size:0.78rem;color:#666">
+      कलेक्सन बन्द: ${fmtTimeOnly(month.collectionClosedAt)} &nbsp;·&nbsp; महिना बन्द: ${fmtTimeOnly(month.closedAt)}
+    </div>`;
+  rows.forEach(r => {
+    const hl = r.hl ? ' highlight' : '';
+    const valStyle = r.red ? 'color:#dc3545' : '';
+    if (r.detail) {
+      html += `<div class="report-row${hl}" style="cursor:pointer;background:#f8fafc" onclick="showReportDetail('${month.id}','${r.detail}')">
+        <span class="label">${r.label} <span style="color:#0d6efd;font-size:0.75rem">▸ विवरण</span></span>
+        <span class="value fw-bold" style="${valStyle}">${Accounting.formatNum(r.val)}</span>
+      </div>`;
+    } else {
+      html += `<div class="report-row${hl}"><span class="label">${r.label}</span><span class="value fw-bold" style="${valStyle}">${Accounting.formatNum(r.val)}</span></div>`;
+    }
+  });
+  html += '</div>';
+  document.getElementById('monthly-report-body').innerHTML = html;
+}
+
+function showReportDetail(monthId, type) {
+  const data = DB.load();
+  const month = data.months.find(m => m.id === monthId);
+  if (!month) return;
+  const nameOf = (id) => (data.members.find(x => x.id === id) || {}).name || id;
+  let title = '';
+  let body = '<div class="table-wrap"><table><thead><tr><th>विवरण</th><th>रकम</th><th>कैफियत</th></tr></thead><tbody>';
+  let total = 0;
+
+  if (type === 'saving' || type === 'interest' || type === 'principal') {
+    title = type === 'saving' ? 'प्राप्त बचत' : type === 'interest' ? 'प्राप्त ब्याज' : 'उठेको सावा';
+    const key = type === 'saving' ? 'saving' : type === 'interest' ? 'interest' : 'principal';
+    Object.keys(month.collections || {}).forEach(mid => {
+      const c = month.collections[mid];
+      const paid = c.totalPaid || 0;
+      if (paid <= 0) return; // advance-only not counted
+      const amt = c[key] || 0;
+      if (amt <= 0) return;
+      total += amt;
+      body += `<tr><td>${nameOf(mid)}</td><td class="fw-bold">${Accounting.formatNum(amt)}</td><td></td></tr>`;
+    });
+  } else if (type === 'other') {
+    title = 'अन्य आम्दानी';
+    (month.otherIncomeDetails || []).forEach(d => {
+      total += d.amount || 0;
+      body += `<tr><td>${d.note || d.type || 'अन्य'}</td><td class="fw-bold">${Accounting.formatNum(d.amount)}</td><td>${d.type || ''}</td></tr>`;
+    });
+    if ((month.advanceFromCash || 0) > 0) {
+      total += month.advanceFromCash;
+      body += `<tr><td>अतिरिक्त नगद (अग्रिम)</td><td class="fw-bold">${Accounting.formatNum(month.advanceFromCash)}</td><td>नगद बढी</td></tr>`;
+    }
+  } else if (type === 'expense') {
+    title = 'खर्च';
+    (month.expenseDetails || []).forEach(d => {
+      total += d.amount || 0;
+      body += `<tr><td>${d.note || d.type || 'खर्च'}</td><td class="fw-bold">${Accounting.formatNum(d.amount)}</td><td>${d.type || ''}</td></tr>`;
+    });
+  } else if (type === 'loans') {
+    title = 'गरिएको लगानी';
+    (month.loansGiven || []).forEach(l => {
+      total += l.amount || 0;
+      const t = l.time ? fmtTimeOnly(l.time) : '';
+      body += `<tr><td>${nameOf(l.memberId)}</td><td class="fw-bold">${Accounting.formatNum(l.amount)}</td><td>${t}</td></tr>`;
+    });
+  }
+
+  body += `<tr style="font-weight:700;background:#f0f7ff"><td>जम्मा</td><td>${Accounting.formatNum(total)}</td><td></td></tr>`;
+  body += '</tbody></table></div>';
+  if (total === 0) body = '<div class="empty-state">यस महिना कुनै रेकर्ड छैन</div>';
+
+  UI.showModal('🔎 ' + title, body, '<button class="btn btn-outline" onclick="showMonthlyReport()">← फर्कनुहोस्</button>');
+}
+
+function showCollectionSummary() {
+  const data = DB.load();
+  const months = data.months.filter(m => m.status === 'closed' || m.id === data.currentMonthId);
+  if (months.length === 0) return UI.toast('कुनै महिना छैन', 'error');
+
+  let html = '<div class="form-group"><label>महिना छान्नुहोस्</label><select id="summary-month" onchange="renderCollectionSummary()">';
+  months.slice().reverse().forEach(m => {
+    html += `<option value="${m.id}">${m.name} (${m.status})</option>`;
+  });
+  html += '</select></div><div id="collection-summary-body"></div>';
+  html += '<button class="btn btn-primary btn-block mt-2" onclick="printReportImage(\'print-summary\')">🖨️ इमेज प्रिन्ट</button>';
+
+  UI.showModal('📋 कलेक्सन सारांश', html, '<button class="btn btn-outline" onclick="openReports()">← फर्कनुहोस्</button>');
+  renderCollectionSummary();
+}
+
+function renderCollectionSummary() {
+  const id = document.getElementById('summary-month').value;
+  const data = DB.load();
+  const month = data.months.find(m => m.id === id);
+  if (!month) return;
+
+  let html = `<div class="print-area" id="print-summary"><h2>${data.group.name}</h2>
+    <div class="print-meta">${month.name} · कलेक्सन सारांश</div>
+    <div class="print-meta" style="font-size:0.8rem">${fmtDateOnly(month.collectionClosedAt || month.closedAt)}</div>
+    <div class="print-meta" style="font-size:0.78rem;color:#666">
+      कलेक्सन बन्द: ${fmtTimeOnly(month.collectionClosedAt)} &nbsp;·&nbsp; महिना बन्द: ${fmtTimeOnly(month.closedAt)}
+    </div>
+    <div class="table-wrap"><table style="font-size:0.78rem">
+      <thead><tr>
+        <th>नाम / नगद</th><th>बचत</th><th>ब्याज</th><th>जरि.</th>
+        <th>सावा</th><th>ऋण</th><th>बाँकी</th><th>अग्रिम</th>
+      </tr></thead><tbody>`;
+
+  let tPaid = 0, tSav = 0, tInt = 0, tFine = 0, tPrin = 0, tTaken = 0, tLoan = 0, tAdv = 0;
+  data.members.filter(m => m.active).forEach(m => {
+    const c = month.collections[m.id] || {};
+    const taken = (month.loansGiven || []).filter(l => l.memberId === m.id).reduce((s, l) => s + l.amount, 0);
+    const snap = month.memberSnapshots[m.id] || {};
+    const loanBal = snap.outstandingLoan !== undefined ? snap.outstandingLoan : (m.outstandingLoan || 0);
+    const adv = snap.advance !== undefined ? snap.advance : (m.advance || 0);
+
+    const fromAdv = (c.fromAdvance || 0) > 0 || c.coveredByAdvance;
+    const noCash = (c.totalPaid || 0) <= 0;
+    let sav = c.saving || 0, int_ = c.interest || 0, fine = c.fine || 0, prin = c.principal || 0;
+    let note = '';
+    if (fromAdv && noCash) {
+      sav = 0; int_ = 0; fine = 0; prin = 0;
+      note = 'अग्रिमबाट';
+    } else if (fromAdv && !noCash) {
+      note = '+अग्रिम';
+    } else if (noCash && !fromAdv) {
+      note = 'नतिरेको';
+    }
+
+    const paid = c.totalPaid || 0;
+    tPaid += paid; tSav += sav; tInt += int_; tFine += fine; tPrin += prin;
+    tTaken += taken; tLoan += loanBal; tAdv += adv;
+
+    const loanStyle = loanBal > 0 ? 'color:#dc3545;font-weight:700' : '';
+    const advStyle = adv > 0 ? 'color:#0d6efd;font-weight:700' : '';
+    const cashStr = paid > 0
+      ? `<span style="color:#0d6efd;font-weight:700">${Accounting.formatNum(paid)}</span>`
+      : (note ? `<span style="font-size:0.7rem;color:#888">${note}</span>` : '');
+
+    html += `<tr>
+      <td style="max-width:110px"><div style="font-weight:600">${m.name}</div><div>${cashStr}</div></td>
+      <td>${Accounting.formatNum(sav)}</td>
+      <td>${Accounting.formatNum(int_)}</td>
+      <td>${Accounting.formatNum(fine)}</td>
+      <td>${Accounting.formatNum(prin)}</td>
+      <td>${Accounting.formatNum(taken)}</td>
+      <td style="${loanStyle}">${Accounting.formatNum(loanBal)}</td>
+      <td style="${advStyle}">${Accounting.formatNum(adv)}</td>
+    </tr>`;
+  });
+  html += `<tr style="font-weight:700;background:#f0f7ff">
+    <td>जम्मा<br><span style="color:#0d6efd">${Accounting.formatNum(tPaid)}</span></td>
+    <td>${Accounting.formatNum(tSav)}</td>
+    <td>${Accounting.formatNum(tInt)}</td>
+    <td>${Accounting.formatNum(tFine)}</td>
+    <td>${Accounting.formatNum(tPrin)}</td>
+    <td>${Accounting.formatNum(tTaken)}</td>
+    <td style="color:#dc3545">${Accounting.formatNum(tLoan)}</td>
+    <td style="color:#0d6efd">${Accounting.formatNum(tAdv)}</td>
+  </tr>`;
+  html += '</tbody></table></div></div>';
+
+  const el = document.getElementById('collection-summary-body');
+  if (el) el.innerHTML = html;
+}
+
+function showYearlyReport() {
+  const data = DB.load();
+  const closed = data.months.filter(m => m.status === 'closed');
+  if (closed.length === 0) return UI.toast('बन्द महिना छैन', 'error');
+
+  let html = `<div class="print-area" id="print-yearly"><h2>${data.group.name}</h2>
+    <div class="print-meta">वार्षिक सारांश</div>
+    <div class="table-wrap"><table>
+      <thead><tr><th>महिना</th><th>सम्पत्ति</th><th>लगानी</th><th>नगद</th><th>खुद आम्दानी</th></tr></thead><tbody>`;
+  closed.forEach(m => {
+    html += `<tr>
+      <td>${m.name}</td>
+      <td>${Accounting.formatNum(m.finalAssets)}</td>
+      <td>${Accounting.formatNum(m.outstandingLoans)}</td>
+      <td>${Accounting.formatNum(m.cashInHand)}</td>
+      <td>${Accounting.formatNum(m.netIncome)}</td>
+    </tr>`;
+  });
+  html += '</tbody></table></div></div>';
+  html += '<button class="btn btn-primary btn-block mt-2" onclick="printReportImage(\'print-yearly\')">🖨️ इमेज प्रिन्ट</button>';
+
+  UI.showModal('📊 वार्षिक रिपोर्ट', html, '<button class="btn btn-outline" onclick="openReports()">← फर्कनुहोस्</button>');
+}
+
+function printReportImage(elementId) {
+  const el = document.getElementById(elementId);
+  if (!el) return UI.toast('प्रिन्ट गर्न सकिएन', 'error');
+  // Simple: open print dialog (user can save as PDF/image)
+  const win = window.open('', '_blank');
+  win.document.write(`<html><head><title>रिपोर्ट</title>
+    <style>
+      body{font-family:sans-serif;padding:20px;color:#000}
+      .report-row{display:flex;justify-content:space-between;padding:6px 0;border-bottom:1px dashed #ccc}
+      table{width:100%;border-collapse:collapse;font-size:12px}
+      th,td{border:1px solid #ccc;padding:4px 6px;text-align:right}
+      th{background:#eee} td:first-child,th:first-child{text-align:left}
+      h2{text-align:center} .print-meta{text-align:center;margin-bottom:16px;color:#555}
+    </style></head><body>${el.innerHTML}</body></html>`);
+  win.document.close();
+  setTimeout(() => { win.print(); }, 300);
+}
+
+// ========== PROFILE TAB ==========
+function renderProfileTab() {
+  const container = document.getElementById('profile-content');
+  if (!Auth.isLoggedIn()) {
+    container.innerHTML = '<div class="empty-state">लगइन गर्नुहोस्</div>';
+    return;
+  }
+
+  if (Auth.isMember()) {
+    renderMemberOwnProfile(container);
+  } else {
+    renderAdminProfile(container);
+  }
+}
+
+function renderMemberOwnProfile(container) {
+  const data = DB.load();
+  const member = data.members.find(m => m.id === Auth.currentUser.memberId);
+  if (!member) {
+    container.innerHTML = '<div class="empty-state">सदस्य भेटिएन</div>';
+    return;
+  }
+
+  const myAssets = Accounting.memberAssets(data, member);
+
+  // Own complaints with replies
+  const myComplaints = (data.complaints || []).filter(c => c.memberId === member.id);
+  let complaintHtml = '';
+  if (myComplaints.length) {
+    complaintHtml = myComplaints.slice().reverse().map(c => {
+      let replies = (c.replies || []).map(r =>
+        `<div style="margin:6px 0 0 12px;padding:6px 10px;background:#f0f7ff;border-radius:8px;font-size:0.85rem">
+          <strong>${r.from === 'admin' ? 'Admin' : 'तपाईं'}:</strong> ${r.text}
+        </div>`).join('');
+      return `<div class="section-card" style="padding:10px">
+        <div class="text-muted" style="font-size:0.75rem">${new Date(c.time).toLocaleString()}</div>
+        <div>${c.text}</div>${replies}
+      </div>`;
+    }).join('');
+  }
+
+  container.innerHTML = `
+    <div class="section-card">
+      <div class="flex gap-2" style="align-items:center">
+        <div class="member-avatar" style="width:60px;height:60px;font-size:1.5rem">${member.name.charAt(0)}</div>
+        <div>
+          <div class="fw-bold" style="font-size:1.15rem">${member.name}</div>
+          <div class="text-muted">📱 ${member.mobile || '-'} · PIN: ${member.pin ? '****' : 'सेट छैन'}</div>
+          <div class="mt-1">
+            <span class="member-badge badge-kitta">${member.kitta} कित्ता</span>
+            <span class="member-badge badge-kitta">सम्पत्ति ${Accounting.formatNum(myAssets)}</span>
+          </div>
+          <div class="mt-1">
+            ${member.outstandingLoan > 0 ? `<span class="member-badge badge-loan">ऋण ${Accounting.formatNum(member.outstandingLoan)}</span> ` : ''}
+            ${member.advance > 0 ? `<span class="member-badge badge-advance">अग्रिम ${Accounting.formatNum(member.advance)}</span> ` : ''}
+            ${member.due > 0 ? `<span class="member-badge badge-due">बाँकी ${Accounting.formatNum(member.due)}</span>` : ''}
+          </div>
+        </div>
+      </div>
+    </div>
+    <button class="btn btn-primary btn-block mb-1" onclick="showPassbook('${member.id}')">📖 मेरो पासबुक</button>
+    <button class="btn btn-info btn-block mb-1" onclick="requestProfileChange()">🔢 PIN / मोबाइल परिवर्तन अनुरोध</button>
+    <button class="btn btn-warning btn-block mb-1" onclick="showComplaintForm()">📢 गुनासो गर्नुहोस्</button>
+    ${complaintHtml ? '<div class="section-title mt-2">मेरा गुनासो / जवाफ</div>' + complaintHtml : ''}
+  `;
+}
+
+function requestProfileChange() {
+  const html = `
+    <p class="text-muted mb-2">Admin लाई PIN वा मोबाइल परिवर्तनको अनुरोध पठाइन्छ।</p>
+    <div class="form-group"><label>नयाँ मोबाइल (खाली राखे नबदलिने)</label><input type="tel" id="req-mobile" placeholder="98xxxxxxxx"></div>
+    <div class="form-group"><label>नयाँ PIN अनुरोध?</label>
+      <select id="req-pin"><option value="no">होइन</option><option value="yes">हो, नयाँ PIN चाहियो</option></select>
+    </div>
+    <button class="btn btn-primary btn-block" onclick="submitProfileRequest()">📤 अनुरोध पठाउनुहोस्</button>
+  `;
+  UI.showModal('🔢 परिवर्तन अनुरोध', html, '<button class="btn btn-outline" onclick="closeModal()">रद्द</button>');
+}
+
+function submitProfileRequest() {
+  const mobile = document.getElementById('req-mobile').value.trim();
+  const wantPin = document.getElementById('req-pin').value === 'yes';
+  const data = DB.load();
+  data.pinRequests = data.pinRequests || [];
+  data.pinRequests.push({
+    id: 'pr_' + Date.now(),
+    memberId: Auth.currentUser.memberId,
+    memberName: Auth.currentUser.name,
+    mobile: mobile || Auth.currentUser.mobile,
+    newMobile: mobile || null,
+    wantPin,
+    time: new Date().toISOString(),
+    status: 'pending'
+  });
+  DB.save(data);
+  UI.toast('अनुरोध पठाइयो', 'success');
+  closeModal();
+}
+
+function renderAdminProfile(container) {
+  const data = DB.load();
+  const showMigration = !data.migration.hideAfterFirst;
+  const pendingPin = (data.pinRequests || []).filter(r => r.status === 'pending').length;
+  const unreadC = (data.complaints || []).filter(c => !c.read).length;
+
+  container.innerHTML = `
+    <div class="section-card">
+      <div class="section-title">👤 Admin प्रोफाइल</div>
+      <div class="report-row"><span class="label">नाम</span><span class="value">${data.admin.name}</span></div>
+      <div class="report-row"><span class="label">Username</span><span class="value">${data.admin.username}</span></div>
+      <div class="report-row"><span class="label">मोबाइल</span><span class="value">${data.admin.mobile}</span></div>
+      <button class="btn btn-light btn-sm mt-1" onclick="editAdminProfile()">✏️ परिवर्तन</button>
+    </div>
+
+    <div class="section-card">
+      <div class="section-title">👥 सदस्य व्यवस्थापन</div>
+      <button class="btn btn-success btn-block mb-1" onclick="showNewMemberForm()">➕ नयाँ सदस्य प्रवेश</button>
+      <div class="search-box">
+        <input type="text" id="profile-member-search" placeholder="नामको अक्षर टाइप गर्नुहोस्..." oninput="filterProfileMembers()">
+      </div>
+      <div id="profile-member-list">
+        <div class="text-muted text-center" style="padding:16px;font-size:0.85rem">नाम खोज्नुहोस् — सूची देखिनेछ</div>
+      </div>
+    </div>
+
+    ${showMigration ? `
+    <div class="section-card" style="border:2px solid #fd7e14">
+      <div class="section-title">📂 अगाडिको हिसाब प्रविष्टि</div>
+      <p class="text-muted mb-1" style="font-size:0.85rem">पुरानो समूहको नगद, ऋण र अग्रिम यहाँ हाल्नुहोस्। पहिलो महिना बन्द भएपछि यो लुक्नेछ।</p>
+      <button class="btn btn-orange btn-block" onclick="openMigration()">📥 अगाडिको हिसाब हाल्नुहोस्</button>
+    </div>
+    ` : ''}
+
+    <div class="section-card">
+      <div class="section-title">📩 PIN अनुरोध र गुनासो
+        ${pendingPin || unreadC ? `<span class="badge">${pendingPin + unreadC}</span>` : ''}
+      </div>
+      <button class="btn btn-info btn-block mb-1" onclick="showPinRequests()">🔢 PIN अनुरोध ${pendingPin ? '('+pendingPin+')' : ''}</button>
+      <button class="btn btn-warning btn-block" onclick="showComplaints()">📢 गुनासो ${unreadC ? '('+unreadC+')' : ''}</button>
+    </div>
+  `;
+}
+
+function filterProfileMembers() {
+  const q = (document.getElementById('profile-member-search').value || '').trim().toLowerCase();
+  const data = DB.load();
+  if (!q) {
+    document.getElementById('profile-member-list').innerHTML = '<div class="text-muted text-center" style="padding:16px;font-size:0.85rem">नाम खोज्नुहोस् — सूची देखिनेछ</div>';
+    return;
+  }
+  const filtered = data.members.filter(m => m.active && m.name.toLowerCase().includes(q));
+  document.getElementById('profile-member-list').innerHTML = filtered.length
+    ? UI.renderMemberList(filtered, 'openMemberDetail')
+    : '<div class="text-muted text-center" style="padding:12px">भेटिएन</div>';
+}
+
+function openMemberDetail(memberId) {
+  const data = DB.load();
+  const member = data.members.find(m => m.id === memberId);
+  if (!member) return;
+
+  const snap = Accounting.getSnapshot(data);
+  const myAssets = Accounting.memberAssets(data, member);
+
+  let html = `
+    <div class="section-title">${member.name}</div>
+    <div class="report-card">
+      <div class="report-row"><span class="label">📱 मोबाइल</span><span class="value">${member.mobile || '-'}</span></div>
+      <div class="report-row"><span class="label">🎫 कित्ता</span><span class="value fw-bold">${member.kitta}</span></div>
+      <div class="report-row highlight"><span class="label">💎 सम्पत्ति (हिस्सा)</span><span class="value fw-bold">${Accounting.formatNum(myAssets)}</span></div>
+      <div class="report-row"><span class="label">💰 प्रति कित्ता</span><span class="value">${Accounting.formatNum(snap.perKitta)}</span></div>
+      <div class="report-row"><span class="label">🤝 बाँकी ऋण</span><span class="value">${Accounting.formatNum(member.outstandingLoan||0)}</span></div>
+      <div class="report-row"><span class="label">💚 अग्रिम</span><span class="value">${Accounting.formatNum(member.advance||0)}</span></div>
+      <div class="report-row"><span class="label">📉 बाँकी</span><span class="value">${Accounting.formatNum(member.due||0)}</span></div>
+      <div class="report-row"><span class="label">🔢 PIN</span><span class="value">${member.pin ? '****' : 'सेट छैन'}</span></div>
+    </div>
+  `;
+
+  // Member complaints — visible in profile (admin + own)
+  const memComplaints = (data.complaints || []).filter(c => c.memberId === memberId);
+  if (memComplaints.length) {
+    html += `<div class="section-title mt-2">📢 गुनासो / प्रतिक्रिया (${memComplaints.length})</div>`;
+    memComplaints.slice().reverse().forEach(c => {
+      const replies = (c.replies || []).map(r =>
+        `<div style="margin:4px 0 0 10px;padding:6px 8px;background:#f0f7ff;border-radius:8px;font-size:0.8rem">
+          <strong>${r.from === 'admin' ? 'Admin' : 'सदस्य'}:</strong> ${r.text}
+        </div>`).join('');
+      html += `<div class="section-card" style="padding:10px;margin-bottom:8px">
+        <div class="text-muted" style="font-size:0.72rem">${new Date(c.time).toLocaleString()}${c.auto ? ' · स्वतः' : ''}</div>
+        <div style="font-size:0.9rem">${c.text}</div>
+        ${replies}
+        ${Auth.isAdmin() && !c.auto ? `<button class="btn btn-sm btn-info mt-1" onclick="replyComplaint('${c.id}')">💬 जवाफ</button>` : ''}
+      </div>`;
+    });
+  } else if (Auth.isAdmin()) {
+    html += `<div class="text-muted text-center mt-2" style="font-size:0.85rem">यस सदस्यको गुनासो छैन</div>`;
+  }
+
+  if (Auth.isAdmin()) {
+    html += `
+      <button class="btn btn-primary btn-block mb-1 mt-2" onclick="editMember('${memberId}')">✏️ सम्पादन</button>
+      <button class="btn btn-success btn-block mb-1" onclick="showAddKitta('${memberId}')">➕ कित्ता थप्नुहोस्</button>
+      <button class="btn btn-warning btn-block mb-1" onclick="showReduceKitta('${memberId}')">➖ कित्ता घटाउनुहोस्</button>
+      <button class="btn btn-info btn-block mb-1" onclick="showSetPin('${memberId}')">🔢 PIN सेट</button>
+      <button class="btn btn-purple btn-block mb-1" onclick="showPassbook('${memberId}')">📖 पासबुक</button>
+      <button class="btn btn-danger btn-block" onclick="confirmExitMember('${memberId}')">🚪 समूहबाट बाहिरिनुहोस्</button>
+    `;
+  } else {
+    html += `<button class="btn btn-purple btn-block mt-2" onclick="showPassbook('${memberId}')">📖 पासबुक</button>`;
+  }
+
+  UI.showModal('👤 ' + member.name, html, '<button class="btn btn-outline" onclick="closeModal()">बन्द</button>');
+}
+
+function editMember(memberId) {
+  const data = DB.load();
+  const m = data.members.find(x => x.id === memberId);
+  const html = `
+    <div class="form-group"><label>नाम</label><input type="text" id="em-name" value="${m.name}"></div>
+    <div class="form-group"><label>मोबाइल</label><input type="tel" id="em-mobile" value="${m.mobile||''}"></div>
+    <button class="btn btn-primary btn-block" onclick="saveMemberEdit('${memberId}')">💾 सेभ</button>
+  `;
+  UI.showModal('✏️ सम्पादन', html, '<button class="btn btn-outline" onclick="openMemberDetail(\''+memberId+'\')">← फर्कनुहोस्</button>');
+}
+
+function saveMemberEdit(memberId) {
+  const name = document.getElementById('em-name').value.trim();
+  const mobile = document.getElementById('em-mobile').value.trim();
+  if (!name) return UI.toast('नाम चाहिन्छ', 'error');
+  const data = DB.load();
+  const m = data.members.find(x => x.id === memberId);
+  m.name = name;
+  m.mobile = mobile;
+  DB.save(data);
+  UI.toast('सेभ भयो', 'success');
+  openMemberDetail(memberId);
+  renderProfileTab();
+}
+
+function showSetPin(memberId) {
+  const html = `
+    <div class="form-group"><label>नयाँ PIN (४ अंक)</label><input type="password" id="set-pin" maxlength="4" placeholder="४ अंक"></div>
+    <button class="btn btn-primary btn-block" onclick="doSetPin('${memberId}')">✅ सेट गर्नुहोस्</button>
+  `;
+  UI.showModal('🔢 PIN सेट', html, '<button class="btn btn-outline" onclick="openMemberDetail(\''+memberId+'\')">←</button>');
+}
+
+function doSetPin(memberId) {
+  const pin = document.getElementById('set-pin').value;
+  const res = Auth.setMemberPin(memberId, pin);
+  UI.toast(res.msg, res.ok ? 'success' : 'error');
+  if (res.ok) openMemberDetail(memberId);
+}
+
+function showAddKitta(memberId) {
+  const data = DB.load();
+  const month = Accounting.getCurrentMonth(data);
+  // Only allowed after collection closed, before month close
+  if (!month || month.status !== 'collection_closed') {
+    return UI.toast('कलेक्सन बन्द भएपछि र महिना बन्द हुनुअघि मात्र कित्ता थप्न मिल्छ', 'error');
+  }
+  const perKitta = Accounting.perKittaValue(data, month) || data.settings.monthlySaving;
+  const html = `
+    <p>हाल प्रति कित्ता मूल्य: <strong>${Accounting.formatNum(perKitta)}</strong></p>
+    <div class="form-group"><label>थप्ने कित्ता संख्या</label><input type="number" id="add-kitta-num" min="1" value="1"></div>
+    <div class="form-group"><label>तिर्नुपर्ने रकम (स्वतः)</label><input type="number" id="add-kitta-amount" readonly></div>
+    <button class="btn btn-success btn-block" onclick="doAddKitta('${memberId}')">✅ कित्ता थप्नुहोस्</button>
+  `;
+  UI.showModal('➕ कित्ता थप', html, '<button class="btn btn-outline" onclick="openMemberDetail(\''+memberId+'\')">←</button>');
+  const updateAmt = () => {
+    const n = parseInt(document.getElementById('add-kitta-num').value) || 0;
+    document.getElementById('add-kitta-amount').value = n * perKitta;
+  };
+  document.getElementById('add-kitta-num').oninput = updateAmt;
+  updateAmt();
+}
+
+function doAddKitta(memberId) {
+  const num = parseInt(document.getElementById('add-kitta-num').value) || 0;
+  const amount = parseFloat(document.getElementById('add-kitta-amount').value) || 0;
+  if (num <= 0) return UI.toast('संख्या गलत', 'error');
+  UI.showPinModal('⚠️ कित्ता थप गर्न PIN चाहिन्छ। रकम: ' + amount, () => {
+    const data = DB.load();
+    const month = Accounting.getCurrentMonth(data);
+    const member = data.members.find(m => m.id === memberId);
+    member.kitta += num;
+    month.otherIncomeDetails.push({
+      type: 'kitta_add', memberId, amount,
+      note: member.name + ' - ' + num + ' कित्ता थप',
+      time: new Date().toISOString()
+    });
+    Accounting.recalcMonth(month, data);
+    DB.save(data);
+    UI.toast(num + ' कित्ता थपियो', 'success');
+    openMemberDetail(memberId);
+    UI.updateHome(data);
+  });
+}
+
+function showReduceKitta(memberId) {
+  const data = DB.load();
+  const month = Accounting.getCurrentMonth(data);
+  if (!month || month.status !== 'collection_closed') {
+    return UI.toast('कलेक्सन बन्द भएपछि मात्र कित्ता घटाउन मिल्छ', 'error');
+  }
+  const member = data.members.find(m => m.id === memberId);
+  const perKitta = Accounting.perKittaValue(data, month) || data.settings.monthlySaving;
+  const feePct = data.settings.kittaReduceFee || 2;
+
+  const html = `
+    <p>हाल कित्ता: <strong>${member.kitta}</strong> · प्रति कित्ता: <strong>${Accounting.formatNum(perKitta)}</strong></p>
+    <div class="form-group"><label>घटाउने कित्ता</label><input type="number" id="red-kitta-num" min="1" max="${member.kitta}" value="1"></div>
+    <div class="form-group"><label>कुल मूल्य</label><input type="number" id="red-kitta-gross" readonly></div>
+    <div class="form-group"><label>शुल्क (${feePct}%)</label><input type="number" id="red-kitta-fee" readonly></div>
+    <div class="form-group"><label>सदस्यले पाउने</label><input type="number" id="red-kitta-net" readonly></div>
+    <button class="btn btn-warning btn-block" onclick="doReduceKitta('${memberId}')">✅ कित्ता घटाउनुहोस्</button>
+  `;
+  UI.showModal('➖ कित्ता घटाउने', html, '<button class="btn btn-outline" onclick="openMemberDetail(\''+memberId+'\')">←</button>');
+
+  const update = () => {
+    const n = parseInt(document.getElementById('red-kitta-num').value) || 0;
+    const gross = n * perKitta;
+    const fee = Math.round(gross * feePct / 100);
+    document.getElementById('red-kitta-gross').value = gross;
+    document.getElementById('red-kitta-fee').value = fee;
+    document.getElementById('red-kitta-net').value = gross - fee;
+  };
+  document.getElementById('red-kitta-num').oninput = update;
+  update();
+}
+
+function doReduceKitta(memberId) {
+  const num = parseInt(document.getElementById('red-kitta-num').value) || 0;
+  const net = parseFloat(document.getElementById('red-kitta-net').value) || 0;
+  if (num <= 0) return UI.toast('संख्या गलत', 'error');
+  UI.showPinModal('⚠️ कित्ता घटाउन PIN चाहिन्छ। फिर्ता: ' + net, () => {
+    const data = DB.load();
+    const month = Accounting.getCurrentMonth(data);
+    const member = data.members.find(m => m.id === memberId);
+    if (num > member.kitta) return UI.toast('कित्ता पर्याप्त छैन', 'error');
+    member.kitta -= num;
+    month.expenseDetails.push({
+      type: 'kitta_reduce', memberId, amount: net,
+      note: member.name + ' - ' + num + ' कित्ता घटाएको',
+      time: new Date().toISOString()
+    });
+    Accounting.recalcMonth(month, data);
+    DB.save(data);
+    UI.toast(num + ' कित्ता घटाइयो, रु. ' + Accounting.formatNum(net) + ' फिर्ता', 'success');
+    openMemberDetail(memberId);
+    UI.updateHome(data);
+  });
+}
+
+function confirmExitMember(memberId) {
+  const data = DB.load();
+  const month = Accounting.getCurrentMonth(data);
+  if (!month || month.status !== 'collection_closed') {
+    return UI.toast('कलेक्सन बन्द भएपछि मात्र बाहिरिन मिल्छ', 'error');
+  }
+  const member = data.members.find(m => m.id === memberId);
+  if ((member.outstandingLoan || 0) > 0) {
+    return UI.toast('पहिले ऋण चुक्ता गर्नुहोस्', 'error');
+  }
+  const perKitta = Accounting.perKittaValue(data, month) || data.settings.monthlySaving;
+  const feePct = data.settings.exitFee || 3;
+  const gross = member.kitta * perKitta;
+  const fee = Math.round(gross * feePct / 100);
+  const net = gross - fee;
+
+  const html = `
+    <p><strong>${member.name}</strong> लाई समूहबाट बाहिरिने?</p>
+    <div class="report-card">
+      <div class="report-row"><span class="label">कित्ता</span><span class="value">${member.kitta}</span></div>
+      <div class="report-row"><span class="label">कुल मूल्य</span><span class="value">${Accounting.formatNum(gross)}</span></div>
+      <div class="report-row"><span class="label">शुल्क (${feePct}%)</span><span class="value">${Accounting.formatNum(fee)}</span></div>
+      <div class="report-row highlight"><span class="label">फिर्ता रकम</span><span class="value">${Accounting.formatNum(net)}</span></div>
+    </div>
+    <button class="btn btn-danger btn-block" onclick="doExitMember('${memberId}', ${net})">🚪 बाहिरिनुहोस्</button>
+  `;
+  UI.showModal('🚪 बाहिरिने', html, '<button class="btn btn-outline" onclick="openMemberDetail(\''+memberId+'\')">←</button>');
+}
+
+function doExitMember(memberId, net) {
+  UI.showPinModal('⚠️ सदस्य बाहिरिन PIN चाहिन्छ। फिर्ता: ' + net, () => {
+    const data = DB.load();
+    const month = Accounting.getCurrentMonth(data);
+    const member = data.members.find(m => m.id === memberId);
+    month.expenseDetails.push({
+      type: 'member_exit', memberId, amount: net,
+      note: member.name + ' बाहिरिए', time: new Date().toISOString()
+    });
+    member.active = false;
+    member.kitta = 0;
+    Accounting.recalcMonth(month, data);
+    DB.save(data);
+    UI.toast('सदस्य बाहिरिए, रु. ' + Accounting.formatNum(net) + ' फिर्ता', 'success');
+    closeModal();
+    renderProfileTab();
+    UI.updateHome(data);
+  });
+}
+
+function showNewMemberForm() {
+  const data = DB.load();
+  const month = Accounting.getCurrentMonth(data);
+  if (!month || month.status !== 'collection_closed') {
+    return UI.toast('कलेक्सन बन्द भएपछि मात्र नयाँ सदस्य थप्न मिल्छ', 'error');
+  }
+  const perKitta = Accounting.perKittaValue(data, month) || data.settings.monthlySaving;
+
+  // Find inactive or create new
+  const html = `
+    <div class="form-group"><label>नाम</label><input type="text" id="nm-name" placeholder="पूरा नाम"></div>
+    <div class="form-group"><label>मोबाइल</label><input type="tel" id="nm-mobile" placeholder="98xxxxxxxx"></div>
+    <div class="form-group"><label>कित्ता संख्या</label><input type="number" id="nm-kitta" min="1" value="1"></div>
+    <p>प्रति कित्ता: <strong>${Accounting.formatNum(perKitta)}</strong></p>
+    <div class="form-group"><label>तिर्नुपर्ने रकम</label><input type="number" id="nm-amount" readonly></div>
+    <button class="btn btn-success btn-block" onclick="doAddNewMember()">✅ प्रवेश गराउनुहोस्</button>
+  `;
+  UI.showModal('➕ नयाँ सदस्य', html, '<button class="btn btn-outline" onclick="closeModal()">रद्द</button>');
+  const upd = () => {
+    const n = parseInt(document.getElementById('nm-kitta').value) || 0;
+    document.getElementById('nm-amount').value = n * perKitta;
+  };
+  document.getElementById('nm-kitta').oninput = upd;
+  upd();
+}
+
+function doAddNewMember() {
+  const name = document.getElementById('nm-name').value.trim();
+  const mobile = document.getElementById('nm-mobile').value.trim();
+  const kitta = parseInt(document.getElementById('nm-kitta').value) || 0;
+  const amount = parseFloat(document.getElementById('nm-amount').value) || 0;
+  if (!name || kitta <= 0) return UI.toast('नाम र कित्ता चाहिन्छ', 'error');
+
+  const data = DB.load();
+  const month = Accounting.getCurrentMonth(data);
+
+  // Reuse inactive slot or create new
+  let member = data.members.find(m => !m.active);
+  if (!member) {
+    member = {
+      id: 'm' + (data.members.length + 1),
+      name, mobile, pin: '', kitta: 0, photo: null, active: true,
+      joinedMonthId: month.id, outstandingLoan: 0, advance: 0, due: 0,
+      assetHistory: [], loanHistory: []
+    };
+    data.members.push(member);
+  } else {
+    member.name = name;
+    member.mobile = mobile;
+    member.active = true;
+    member.joinedMonthId = month.id;
+    member.outstandingLoan = 0;
+    member.advance = 0;
+    member.due = 0;
+  }
+  member.kitta = kitta;
+
+  month.otherIncomeDetails.push({
+    type: 'new_member',
+    memberId: member.id,
+    amount,
+    note: name + ' - नयाँ प्रवेश (' + kitta + ' कित्ता)',
+    time: new Date().toISOString()
+  });
+  Accounting.recalcMonth(month, data);
+  DB.save(data);
+  UI.toast(name + ' प्रवेश भयो', 'success');
+  closeModal();
+  renderProfileTab();
+  UI.updateHome(data);
+}
+
+// After viewing passbook/report, member is asked about complaints on CLOSE
+let _askComplaintOnClose = null; // { memberId, source }
+
+function showPassbook(memberId) {
+  // Open passbook first; ask complaint only when closing (member only)
+  if (Auth.isMember() && Auth.currentUser.memberId === memberId) {
+    _askComplaintOnClose = { memberId, source: 'पासबुक' };
+  } else {
+    _askComplaintOnClose = null;
+  }
+  renderPassbookContent(memberId);
+}
+
+function askComplaintAfterView(memberId, source) {
+  const html = `
+    <p>${source} हेर्नुभयो। के तपाईंलाई कुनै शंका / गुनासो छ?</p>
+    <button class="btn btn-warning btn-block mb-1" onclick="complaintAfterYes('${memberId}','${source}')">हो, गुनासो छ</button>
+    <button class="btn btn-success btn-block mb-1" onclick="complaintAfterNo('${memberId}','${source}')">छैन, गुनासो छैन</button>
+  `;
+  UI.showModal('📢 गुनासो', html, '');
+}
+
+function complaintAfterYes(memberId, source) {
+  const html = `
+    <div class="form-group"><label>गुनासो / शंका लेख्नुहोस्</label>
+      <textarea id="pb-complaint" rows="3" placeholder="लेख्नुहोस्..."></textarea>
+    </div>
+    <button class="btn btn-warning btn-block" onclick="submitComplaintAfter('${memberId}','${source}')">📤 पठाउनुहोस्</button>
+  `;
+  UI.showModal('📢 गुनासो लेख्नुहोस्', html, '<button class="btn btn-outline" onclick="askComplaintAfterView(\''+memberId+'\',\''+source+'\')">←</button>');
+}
+
+function complaintAfterNo(memberId, source) {
+  const data = DB.load();
+  data.complaints = data.complaints || [];
+  data.complaints.push({
+    id: 'c_' + Date.now(),
+    memberId,
+    text: 'गुनासो छैन (' + source + ' हेरेपछि)',
+    time: new Date().toISOString(),
+    read: false,
+    replies: [],
+    auto: true
+  });
+  DB.save(data);
+  UI.toast('धन्यवाद', 'success');
+  closeModal();
+}
+
+function submitComplaintAfter(memberId, source) {
+  const text = document.getElementById('pb-complaint').value.trim();
+  if (!text) return UI.toast('केही लेख्नुहोस्', 'error');
+  const data = DB.load();
+  data.complaints = data.complaints || [];
+  data.complaints.push({
+    id: 'c_' + Date.now(),
+    memberId,
+    text: '[' + source + '] ' + text,
+    time: new Date().toISOString(),
+    read: false,
+    replies: []
+  });
+  DB.save(data);
+  UI.toast('गुनासो पठाइयो', 'success');
+  closeModal();
+}
+
+function renderPassbookContent(memberId) {
+  const data = DB.load();
+  const member = data.members.find(m => m.id === memberId);
+  const snap = Accounting.getSnapshot(data);
+  const myAssets = Accounting.memberAssets(data, member);
+  const curMonth = Accounting.getCurrentMonth(data);
+
+  let assetRows = (member.assetHistory || []).slice();
+  let loanRows = (member.loanHistory || []).slice();
+
+  // Live update for open month (before close)
+  if (curMonth && curMonth.status !== 'closed') {
+    const prevA = assetRows.length ? assetRows[assetRows.length - 1].total : 0;
+    assetRows.push({
+      monthName: curMonth.name + ' (चलिरहेको)',
+      prev: prevA,
+      added: myAssets - prevA,
+      total: myAssets
+    });
+    const taken = (curMonth.loansGiven || []).filter(l => l.memberId === memberId).reduce((s, l) => s + l.amount, 0);
+    const repaid = (curMonth.collections[memberId] && curMonth.collections[memberId].principal) || 0;
+    const prevL = loanRows.length ? loanRows[loanRows.length - 1].balance
+      : ((member.outstandingLoan || 0) - taken + repaid);
+    loanRows.push({
+      monthName: curMonth.name + ' (चलिरहेको)',
+      prev: prevL,
+      taken,
+      repaid,
+      balance: member.outstandingLoan || 0
+    });
+  }
+
+  let html = `<div class="print-area" id="print-passbook">
+    <h2>${data.group.name}</h2>
+    <div class="print-meta">पासबुक · ${member.name}</div>
+    <div class="report-card mb-2">
+      <div class="report-row"><span class="label">🎫 कित्ता</span><span class="value fw-bold">${member.kitta}</span></div>
+      <div class="report-row highlight"><span class="label">💎 हालको सम्पत्ति</span><span class="value fw-bold">${Accounting.formatNum(myAssets)}</span></div>
+      <div class="report-row"><span class="label">💰 प्रति कित्ता</span><span class="value">${Accounting.formatNum(snap.perKitta)}</span></div>
+      <div class="report-row"><span class="label">🤝 बाँकी ऋण</span><span class="value">${Accounting.formatNum(member.outstandingLoan||0)}</span></div>
+      <div class="report-row"><span class="label">💚 अग्रिम</span><span class="value">${Accounting.formatNum(member.advance||0)}</span></div>
+    </div>
+    <h3>💎 सम्पत्ति इतिहास</h3>
+    <div class="table-wrap"><table><thead><tr><th>महिना</th><th>पहिले</th><th>थप</th><th>जम्मा</th></tr></thead><tbody>`;
+  if (!assetRows.length) {
+    html += '<tr><td colspan="4">अहिलेसम्म रेकर्ड छैन</td></tr>';
+  } else {
+    assetRows.forEach(h => {
+      html += `<tr><td>${h.monthName}</td><td>${Accounting.formatNum(h.prev)}</td><td>${Accounting.formatNum(h.added)}</td><td class="fw-bold">${Accounting.formatNum(h.total)}</td></tr>`;
+    });
+  }
+  html += `</tbody></table></div>
+    <h3 class="mt-2">🤝 ऋण इतिहास</h3>
+    <div class="table-wrap"><table><thead><tr><th>महिना</th><th>पहिले</th><th>लिएको</th><th>तिरेको</th><th>बाँकी</th></tr></thead><tbody>`;
+  if (!loanRows.length) {
+    html += '<tr><td colspan="5">अहिलेसम्म रेकर्ड छैन</td></tr>';
+  } else {
+    loanRows.forEach(h => {
+      html += `<tr><td>${h.monthName}</td><td>${Accounting.formatNum(h.prev)}</td><td>${Accounting.formatNum(h.taken)}</td><td>${Accounting.formatNum(h.repaid)}</td><td class="fw-bold">${Accounting.formatNum(h.balance)}</td></tr>`;
+    });
+  }
+  html += '</tbody></table></div></div>';
+  html += '<button class="btn btn-primary btn-block mt-2" onclick="printReportImage(\'print-passbook\')">🖨️ प्रिन्ट</button>';
+
+  UI.showModal('📖 पासबुक - ' + member.name, html, '<button class="btn btn-outline" onclick="closeModal()">बन्द</button>');
+}
+
+// ========== MIGRATION ==========
+function openMigration() {
+  const data = DB.load();
+  if (!data.migration) data.migration = { cash: 0, loans: {}, advances: {}, kittas: {} };
+  if (!data.migration.kittas) data.migration.kittas = {};
+  if (!data.migration.loans) data.migration.loans = {};
+  if (!data.migration.advances) data.migration.advances = {};
+
+  const html = `
+    <p class="text-muted mb-2" style="font-size:0.85rem">पुरानो हिसाब: नगद + प्रत्येक सदस्यको <strong>कित्ता</strong>, ऋण र अग्रिम हाल्नुहोस्। सेभपछि होममा देखिन्छ।</p>
+    <div class="form-group">
+      <label>💵 हालको जम्मा नगद</label>
+      <input type="number" id="mig-cash" value="${data.migration.cash || 0}">
+    </div>
+    <div class="section-title">सदस्यअनुसार कित्ता · ऋण · अग्रिम</div>
+    <div id="mig-members">
+      ${data.members.filter(m => m.active).map(m => `
+        <div class="section-card" style="padding:10px">
+          <div class="fw-bold mb-1">${m.name}</div>
+          <div class="flex gap-1">
+            <div class="form-group" style="flex:1;margin:0">
+              <label>🎫 कित्ता</label>
+              <input type="number" data-mig-kitta="${m.id}" value="${data.migration.kittas[m.id] !== undefined ? data.migration.kittas[m.id] : (m.kitta || 0)}" min="0">
+            </div>
+            <div class="form-group" style="flex:1;margin:0">
+              <label>ऋण</label>
+              <input type="number" data-mig-loan="${m.id}" value="${data.migration.loans[m.id] || 0}">
+            </div>
+            <div class="form-group" style="flex:1;margin:0">
+              <label>अग्रिम</label>
+              <input type="number" data-mig-adv="${m.id}" value="${data.migration.advances[m.id] || 0}">
+            </div>
+          </div>
+        </div>
+      `).join('')}
+    </div>
+    <button class="btn btn-orange btn-block mt-2" onclick="saveMigration()">💾 सेभ गर्नुहोस्</button>
+  `;
+  UI.showModal('📂 अगाडिको हिसाब', html, '<button class="btn btn-outline" onclick="closeModal()">बन्द</button>');
+}
+
+function saveMigration() {
+  const cashEl = document.getElementById('mig-cash');
+  if (!cashEl) return UI.toast('फारम भेटिएन — फेरि खोल्नुहोस्', 'error');
+
+  const cash = parseFloat(cashEl.value) || 0;
+  const kittas = {};
+  const loans = {};
+  const advances = {};
+
+  document.querySelectorAll('[data-mig-kitta]').forEach(inp => {
+    kittas[inp.getAttribute('data-mig-kitta')] = parseInt(inp.value, 10) || 0;
+  });
+  document.querySelectorAll('[data-mig-loan]').forEach(inp => {
+    const v = parseFloat(inp.value) || 0;
+    if (v > 0) loans[inp.getAttribute('data-mig-loan')] = v;
+  });
+  document.querySelectorAll('[data-mig-adv]').forEach(inp => {
+    const v = parseFloat(inp.value) || 0;
+    if (v > 0) advances[inp.getAttribute('data-mig-adv')] = v;
+  });
+
+  const totalLoans = Object.values(loans).reduce((s, v) => s + v, 0);
+  const totalKitta = Object.values(kittas).reduce((s, v) => s + v, 0);
+  const totalAssets = cash + totalLoans;
+
+  if (cash === 0 && totalLoans === 0 && totalKitta === 0) {
+    return UI.toast('कम्तिमा नगद वा कित्ता वा ऋण हाल्नुहोस्', 'error');
+  }
+
+  UI.showPinModal('सेभ गर्न PIN दिनुहोस्', () => {
+    try {
+      const data = DB.load();
+      data.migration = {
+        cash: cash,
+        loans: loans,
+        advances: advances,
+        kittas: kittas,
+        hideAfterFirst: false
+      };
+      data.migrationDone = true;
+
+      // Single apply: members + open month + passbook seed
+      Accounting.applyMigration(data);
+
+      localStorage.setItem(DB.KEY, JSON.stringify(data));
+      localStorage.setItem('gs_mig_backup', JSON.stringify({ cash, loans, advances, kittas, totalAssets, totalLoans, totalKitta }));
+
+      const raw = localStorage.getItem(DB.KEY);
+      const check = JSON.parse(raw);
+      if (!check.migrationDone || Number(check.migration.cash) !== cash) {
+        UI.showModal('❌ सेभ असफल',
+          '<p>डाटा स्टोरेजमा बसेन। Chrome बाट फाइल खोल्नुहोस्।</p>',
+          '<button class="btn btn-primary" onclick="closeModal()">ठीक छ</button>');
+        return;
+      }
+
+      APP_DATA = check;
+      closeModal();
+      UI.updateHome(check);
+      UI.updateHeader(check);
+      renderHomeByRole();
+      renderProfileTab();
+
+      const confHtml = `
+        <div class="report-card">
+          <div class="report-row highlight"><span class="label">💵 नगद</span><span class="value fw-bold">${Accounting.formatNum(check.migration.cash)}</span></div>
+          <div class="report-row"><span class="label">🤝 जम्मा ऋण</span><span class="value fw-bold">${Accounting.formatNum(totalLoans)}</span></div>
+          <div class="report-row"><span class="label">🎫 जम्मा कित्ता</span><span class="value fw-bold">${Accounting.formatNum(totalKitta)}</span></div>
+          <div class="report-row highlight"><span class="label">💎 सम्पत्ति</span><span class="value fw-bold">${Accounting.formatNum(totalAssets)}</span></div>
+        </div>
+        <p class="text-center mt-2">होममा पनि यही देखिनुपर्छ।</p>
+        <p class="text-muted text-center" style="font-size:0.85rem">अब <strong>मासिक असुली</strong> बाट नयाँ महिना सुरु गर्नुहोस्।</p>
+      `;
+      UI.showModal('✅ माइग्रेशन सफल', confHtml,
+        '<button class="btn btn-primary" onclick="closeModal(); switchTab(\'home\')">होममा जानुहोस्</button>');
+    } catch (err) {
+      UI.showModal('❌ त्रुटि', '<p>' + (err.message || String(err)) + '</p>',
+        '<button class="btn btn-primary" onclick="closeModal()">ठीक छ</button>');
+    }
+  });
+}
+
+// ========== PIN REQUESTS & COMPLAINTS ==========
+function showPinRequests() {
+  const data = DB.load();
+  const list = data.pinRequests || [];
+  let html = '';
+  if (list.length === 0) {
+    html = '<div class="empty-state">कुनै अनुरोध छैन</div>';
+  } else {
+    list.slice().reverse().forEach(r => {
+      html += `<div class="section-card" style="cursor:pointer" onclick="resolvePinRequest('${r.id}')">
+        <div class="fw-bold">${r.memberName}</div>
+        <div class="text-muted">${r.mobile} · ${new Date(r.time).toLocaleString()}</div>
+        <div class="mt-1">${r.status === 'pending' ? '⏳ थिचेर समाधान गर्नुहोस्' : '✅ स्वीकृत'}</div>
+      </div>`;
+    });
+  }
+  UI.showModal('🔢 PIN अनुरोध', html, '<button class="btn btn-outline" onclick="closeModal()">बन्द</button>');
+}
+
+function resolvePinRequest(reqId) {
+  const data = DB.load();
+  const r = (data.pinRequests || []).find(x => x.id === reqId);
+  if (!r || r.status !== 'pending') return openMemberDetail(r.memberId);
+  // Go directly to set PIN for that member
+  closeModal();
+  showSetPin(r.memberId);
+}
+
+function showComplaints() {
+  const data = DB.load();
+  const list = data.complaints || [];
+  let html = '';
+  if (list.length === 0) {
+    html = '<div class="empty-state">कुनै गुनासो छैन</div>';
+  } else {
+    list.slice().reverse().forEach(c => {
+      const m = data.members.find(x => x.id === c.memberId);
+      const badge = c.read ? '' : ' <span class="member-badge badge-due">नयाँ</span>';
+      html += `<div class="section-card" style="cursor:pointer" onclick="openComplaintDetail('${c.id}')">
+        <div class="fw-bold">${m ? m.name : c.memberId}${badge}</div>
+        <div class="text-muted">${new Date(c.time).toLocaleString()}</div>
+        <p class="mt-1">${c.text.substring(0, 60)}${c.text.length > 60 ? '...' : ''}</p>
+      </div>`;
+    });
+  }
+  UI.showModal('📢 गुनासोहरू', html, '<button class="btn btn-outline" onclick="closeModal()">बन्द</button>');
+}
+
+function openComplaintDetail(cId) {
+  const data = DB.load();
+  const c = (data.complaints || []).find(x => x.id === cId);
+  if (!c) return;
+  c.read = true;
+  DB.save(data);
+  const m = data.members.find(x => x.id === c.memberId);
+  let replies = (c.replies || []).map(r =>
+    `<div style="margin:8px 0;padding:8px 12px;background:${r.from==='admin'?'#e7f1ff':'#f8f9fa'};border-radius:10px;font-size:0.9rem">
+      <strong>${r.from === 'admin' ? 'Admin' : (m?m.name:'सदस्य')}:</strong> ${r.text}
+      <div class="text-muted" style="font-size:0.7rem">${new Date(r.time).toLocaleString()}</div>
+    </div>`).join('');
+
+  const html = `
+    <div class="fw-bold">${m ? m.name : c.memberId}</div>
+    <div class="text-muted mb-1">${new Date(c.time).toLocaleString()}</div>
+    <div class="section-card">${c.text}</div>
+    ${replies}
+    ${Auth.isAdmin() ? `
+      <div class="form-group mt-2"><label>जवाफ लेख्नुहोस्</label>
+        <textarea id="complaint-reply" rows="2" placeholder="जवाफ..."></textarea>
+      </div>
+      <button class="btn btn-primary btn-block" onclick="replyComplaint('${cId}')">📤 जवाफ पठाउनुहोस्</button>
+    ` : ''}
+  `;
+  UI.showModal('📢 गुनासो', html, '<button class="btn btn-outline" onclick="showComplaints()">← फर्कनुहोस्</button>');
+}
+
+function replyComplaint(cId) {
+  const text = document.getElementById('complaint-reply').value.trim();
+  if (!text) return UI.toast('जवाफ लेख्नुहोस्', 'error');
+  const data = DB.load();
+  const c = (data.complaints || []).find(x => x.id === cId);
+  if (!c) return;
+  c.replies = c.replies || [];
+  c.replies.push({ from: 'admin', text, time: new Date().toISOString() });
+  DB.save(data);
+  UI.toast('जवाफ पठाइयो', 'success');
+  openComplaintDetail(cId);
+}
+
+function showComplaintForm() {
+  const html = `
+    <div class="form-group">
+      <label>तपाईंको गुनासो / सुझाव</label>
+      <textarea id="complaint-text" rows="4" placeholder="लेख्नुहोस्..."></textarea>
+    </div>
+    <button class="btn btn-warning btn-block" onclick="submitComplaint()">📤 पठाउनुहोस्</button>
+  `;
+  UI.showModal('📢 गुनासो', html, '<button class="btn btn-outline" onclick="closeModal()">रद्द</button>');
+}
+
+function submitComplaint() {
+  const text = document.getElementById('complaint-text').value.trim();
+  if (!text) return UI.toast('केही लेख्नुहोस्', 'error');
+  const data = DB.load();
+  data.complaints = data.complaints || [];
+  data.complaints.push({
+    id: 'c_' + Date.now(),
+    memberId: Auth.currentUser.memberId,
+    text,
+    time: new Date().toISOString(),
+    read: false,
+    replies: []
+  });
+  DB.save(data);
+  UI.toast('गुनासो पठाइयो', 'success');
+  closeModal();
+}
+
+function editAdminProfile() {
+  const data = DB.load();
+  const html = `
+    <div class="form-group"><label>नाम</label><input type="text" id="ea-name" value="${data.admin.name}"></div>
+    <div class="form-group"><label>Username</label><input type="text" id="ea-user" value="${data.admin.username}"></div>
+    <div class="form-group"><label>नयाँ Password (खाली राखे नबदलिने)</label><input type="password" id="ea-pass"></div>
+    <div class="form-group"><label>मोबाइल</label><input type="tel" id="ea-mobile" value="${data.admin.mobile}"></div>
+    <div class="form-group"><label>नयाँ PIN (खाली राखे नबदलिने)</label><input type="password" id="ea-pin" maxlength="4"></div>
+    <button class="btn btn-primary btn-block" onclick="saveAdminProfile()">💾 सेभ</button>
+  `;
+  UI.showModal('✏️ Admin प्रोफाइल', html, '<button class="btn btn-outline" onclick="closeModal()">रद्द</button>');
+}
+
+function saveAdminProfile() {
+  const data = DB.load();
+  data.admin.name = document.getElementById('ea-name').value.trim() || data.admin.name;
+  data.admin.username = document.getElementById('ea-user').value.trim() || data.admin.username;
+  const pass = document.getElementById('ea-pass').value;
+  if (pass) data.admin.password = pass;
+  data.admin.mobile = document.getElementById('ea-mobile').value.trim() || data.admin.mobile;
+  const pin = document.getElementById('ea-pin').value;
+  if (pin) {
+    if (pin.length !== 4) return UI.toast('PIN ४ अंकको हुनुपर्छ', 'error');
+    data.admin.pin = pin;
+    data.settings.closePin = pin;
+  }
+  // Sync name to member
+  const m = data.members.find(x => x.id === data.admin.memberId);
+  if (m) { m.name = data.admin.name; m.mobile = data.admin.mobile; }
+  DB.save(data);
+  UI.toast('सेभ भयो', 'success');
+  closeModal();
+  renderProfileTab();
+}
+
+// ========== SETTINGS ==========
+function renderSettingsTab() {
+  const container = document.getElementById('settings-content');
+  if (!Auth.isAdmin()) {
+    container.innerHTML = `
+      <div class="section-card">
+        <div class="section-title">⚙️ सेटिङ</div>
+        <p class="text-muted">सदस्यले सेटिङ परिवर्तन गर्न सक्दैनन्।</p>
+        <button class="btn btn-danger btn-block mt-2" onclick="doLogout()">🚪 लगआउट</button>
+      </div>
+    `;
+    return;
+  }
+
+  const data = DB.load();
+  container.innerHTML = `
+    <div class="section-card">
+      <div class="section-title">⚙️ सेटिङ</div>
+      <ul class="settings-list">
+        <li class="settings-item" onclick="editGroupProfile()">
+          <div class="settings-icon" style="background:#e7f1ff">🏛️</div>
+          <div class="settings-text"><div class="title">समूह प्रोफाइल</div><div class="desc">नाम, ठेगाना, स्थापना मिति</div></div>
+          <div class="settings-arrow">›</div>
+        </li>
+        <li class="settings-item" onclick="editRates()">
+          <div class="settings-icon" style="background:#d1e7dd">💰</div>
+          <div class="settings-text"><div class="title">दर र शुल्क</div><div class="desc">बचत, ब्याज, जरिवाना, कित्ता शुल्क</div></div>
+          <div class="settings-arrow">›</div>
+        </li>
+        <li class="settings-item" onclick="showAppGuide()">
+          <div class="settings-icon" style="background:#fff3cd">📖</div>
+          <div class="settings-text"><div class="title">एप गाइड / सूत्र</div><div class="desc">सबै हिसाब सूत्रहरू</div></div>
+          <div class="settings-arrow">›</div>
+        </li>
+        <li class="settings-item" onclick="doExportBackup()">
+          <div class="settings-icon" style="background:#cff4fc">📤</div>
+          <div class="settings-text"><div class="title">Export ब्याकअप</div><div class="desc">JSON फाइल डाउनलोड / सेभ</div></div>
+          <div class="settings-arrow">›</div>
+        </li>
+        <li class="settings-item" onclick="triggerImport()">
+          <div class="settings-icon" style="background:#e0cffc">📥</div>
+          <div class="settings-text"><div class="title">Import ब्याकअप</div><div class="desc">JSON फाइलबाट पुनर्स्थापना</div></div>
+          <div class="settings-arrow">›</div>
+        </li>
+        <li class="settings-item" onclick="doLogout()">
+          <div class="settings-icon" style="background:#f8d7da">🚪</div>
+          <div class="settings-text"><div class="title">लगआउट</div><div class="desc">एपबाट बाहिरिनुहोस्</div></div>
+          <div class="settings-arrow">›</div>
+        </li>
+      </ul>
+    </div>
+    <input type="file" id="import-file" accept=".json" class="hidden" onchange="doImport(event)">
+  `;
+}
+
+function editGroupProfile() {
+  const data = DB.load();
+  const html = `
+    <div class="form-group"><label>समूह नाम</label><input type="text" id="gp-name" value="${data.group.name||''}"></div>
+    <div class="form-group"><label>ठेगाना</label><input type="text" id="gp-address" value="${data.group.address||''}"></div>
+    <div class="form-group"><label>स्थापना मिति</label><input type="text" id="gp-est" value="${data.group.established||''}" placeholder="उदा: २०७५ साउन"></div>
+    <div class="form-group"><label>लोगो इमोजी</label><input type="text" id="gp-logo" value="${data.group.logo||'💰'}" maxlength="2"></div>
+    <button class="btn btn-primary btn-block" onclick="saveGroupProfile()">💾 सेभ</button>
+  `;
+  UI.showModal('🏛️ समूह प्रोफाइल', html, '<button class="btn btn-outline" onclick="closeModal()">रद्द</button>');
+}
+
+function saveGroupProfile() {
+  const data = DB.load();
+  data.group.name = document.getElementById('gp-name').value.trim() || data.group.name;
+  data.group.address = document.getElementById('gp-address').value.trim();
+  data.group.established = document.getElementById('gp-est').value.trim();
+  data.group.logo = document.getElementById('gp-logo').value.trim() || '💰';
+  DB.save(data);
+  UI.toast('सेभ भयो', 'success');
+  UI.updateHeader(data);
+  closeModal();
+}
+
+function editRates() {
+  const data = DB.load();
+  const s = data.settings;
+  const html = `
+    <div class="form-group"><label>प्रति कित्ता मासिक बचत (रु.)</label><input type="number" id="rt-saving" value="${s.monthlySaving}"></div>
+    <div class="form-group"><label>मासिक ब्याज %</label><input type="number" id="rt-interest" value="${s.interestRate}" step="0.1"></div>
+    <div class="form-group"><label>जरिवाना %</label><input type="number" id="rt-fine" value="${s.fineRate}" step="0.1"></div>
+    <div class="form-group"><label>कित्ता घटाउँदा शुल्क %</label><input type="number" id="rt-reduce" value="${s.kittaReduceFee}" step="0.1"></div>
+    <div class="form-group"><label>बाहिरिँदा शुल्क %</label><input type="number" id="rt-exit" value="${s.exitFee}" step="0.1"></div>
+    <button class="btn btn-primary btn-block" onclick="saveRates()">💾 सेभ</button>
+  `;
+  UI.showModal('💰 दर र शुल्क', html, '<button class="btn btn-outline" onclick="closeModal()">रद्द</button>');
+}
+
+function saveRates() {
+  UI.showPinModal('⚠️ दर/शुल्क परिवर्तन गर्न PIN चाहिन्छ', () => {
+    const data = DB.load();
+    data.settings.monthlySaving = parseFloat(document.getElementById('rt-saving').value) || 0;
+    data.settings.interestRate = parseFloat(document.getElementById('rt-interest').value) || 0;
+    data.settings.fineRate = parseFloat(document.getElementById('rt-fine').value) || 0;
+    data.settings.kittaReduceFee = parseFloat(document.getElementById('rt-reduce').value) || 0;
+    data.settings.exitFee = parseFloat(document.getElementById('rt-exit').value) || 0;
+    DB.save(data);
+    UI.toast('सेभ भयो', 'success');
+    closeModal();
+  });
+}
+
+function showAppGuide() {
+  const html = `
+    <div class="report-card" style="font-size:0.85rem;max-height:60vh;overflow:auto">
+      <p><strong>अकाउन्टिङ सूत्र:</strong></p>
+      <p>१. सुरु मौज्दात = अघिल्लो महिनाको अन्तिम मौज्दात</p>
+      <p>२. प्राप्त बचत = यो महिनाको नगद बचत</p>
+      <p>३. प्राप्त ब्याज = अघिल्लो महिनाको बाँकी सावा × मासिक ब्याज%</p>
+      <p>४. अन्य आम्दानी = नयाँ सदस्य/कित्ता थप आदि</p>
+      <p>५. जम्मा आम्दानी = २+३+४</p>
+      <p>६. खर्च = खर्च + कित्ता घटाउँदा/बाहिरिँदा खुद रकम</p>
+      <p>७. खुद आम्दानी = ५−६</p>
+      <p>८. अन्तिम मौज्दात = १+७</p>
+      <p>९. उठेको सावा = यो महिना तिरेको सावा</p>
+      <p>१०. गरिएको लगानी = यो महिना दिइएको ऋण</p>
+      <p>११. उठ्न बाँकी = अघिल्लो ११ − ९ + १०</p>
+      <p>१२. कोसमा नगद = ८ − ११</p>
+      <p>प्रति कित्ता मूल्य = ८ ÷ जम्मा कित्ता</p>
+      <hr>
+      <p><strong>महिना क्रम:</strong> सुरु → कलेक्सन → कलेक्सन बन्द → कित्ता/सदस्य परिवर्तन → ऋण → महिना बन्द</p>
+      <p><strong>ब्याज:</strong> अघिल्लो महिनाको अन्तिम बाँकीमा मात्र। नयाँ ऋण अर्को महिनादेखि।</p>
+    </div>
+  `;
+  UI.showModal('📖 एप गाइड', html, '<button class="btn btn-outline" onclick="closeModal()">बन्द</button>');
+}
+
+function doExportBackup() {
+  const canPick = typeof window.showSaveFilePicker === 'function';
+  UI.showModal('📤 Export ब्याकअप',
+    canPick
+      ? `<p><strong>सेभ लोकेसन छान्नुहोस्</strong></p>
+         <p>अर्को स्क्रिनमा फोल्डर छानेर <strong>Save</strong> थिच्नुहोस् — फाइल त्यहीँ सेभ हुन्छ।</p>
+         <button class="btn btn-primary btn-block" onclick="runExportBackup()">📁 लोकेसन छानेर सेभ गर्नुहोस्</button>`
+      : `<p><strong>फाइल सेभ</strong></p>
+         <p>यस ब्राउजरमा फोल्डर-पिकर नहुन सक्छ। सेभ थिचेपछि लोकेसन छान्न मिल्ने भए छान्नुहोस्।</p>
+         <button class="btn btn-primary btn-block" onclick="runExportBackup()">💾 सेभ / डाउनलोड</button>`,
+    '<button class="btn btn-outline" onclick="closeModal()">रद्द</button>');
+}
+
+async function runExportBackup() {
+  try {
+    const fname = await DB.exportJSON();
+    if (fname === null) {
+      UI.toast('सेभ रद्द भयो', 'error');
+      return;
+    }
+    closeModal();
+    UI.toast('सेभ भयो: ' + fname, 'success');
+  } catch (e) {
+    UI.toast('सेभ असफल: ' + (e.message || e), 'error');
+  }
+}
+
+function triggerImport() {
+  UI.showModal('📥 Import ब्याकअप',
+    `<p>ब्याकअप JSON फाइल छान्नुहोस् (फोन वा Drive बाट डाउनलोड गरेको)।</p>
+     <button class="btn btn-primary btn-block" onclick="document.getElementById('import-file').click(); closeModal();">📂 फाइल छान्नुहोस्</button>`,
+    '<button class="btn btn-outline" onclick="closeModal()">रद्द</button>');
+}
+
+function doImport(e) {
+  const file = e.target.files[0];
+  if (!file) return;
+  DB.importJSON(file).then(() => {
+    UI.toast('Import सफल', 'success');
+    APP_DATA = DB.load();
+    showMainApp();
+  }).catch(err => UI.toast('Import असफल: ' + err.message, 'error'));
+}
+
+function doLogout() {
+  Auth.logout();
+  showLoginScreen();
+  UI.toast('लगआउट भयो', 'success');
+}
+
+// ========== VIDHAN (Rules & Meetings) ==========
+function renderVidhanTab() {
+  const container = document.getElementById('vidhan-content');
+  if (!container) return;
+  const data = DB.load();
+  const rules = data.rules || [];
+  const meetings = data.meetings || [];
+  const suggestions = data.suggestions || [];
+
+  let html = `
+    <div class="section-card">
+      <div class="section-title">📜 समूहको नियम तथा कानुन</div>
+      ${rules.length === 0 ? '<div class="text-muted">अहिलेसम्म नियम लेखिएको छैन</div>' :
+        rules.map((r, i) => `<div class="report-row"><span class="label">${i + 1}. ${r.text}</span>
+          ${Auth.isAdmin() ? `<button class="btn btn-danger btn-sm" onclick="deleteRule('${r.id}')">🗑️</button>` : ''}
+        </div>`).join('')}
+      ${Auth.isAdmin() ? `<button class="btn btn-primary btn-block mt-2" onclick="addRuleForm()">➕ नियम थप्नुहोस्</button>` : ''}
+    </div>
+
+    <div class="section-card">
+      <div class="section-title">🏛️ बैठक निर्णयहरू</div>
+      ${meetings.length === 0 ? '<div class="text-muted">अहिलेसम्म बैठक निर्णय छैन</div>' :
+        meetings.slice().reverse().map(m => `<div class="section-card" style="padding:10px;margin-bottom:8px">
+          <div class="fw-bold">${m.title}</div>
+          <div class="text-muted" style="font-size:0.75rem">${new Date(m.time).toLocaleString()}</div>
+          <div class="mt-1">${m.decision}</div>
+          ${Auth.isAdmin() ? `<button class="btn btn-danger btn-sm mt-1" onclick="deleteMeeting('${m.id}')">🗑️</button>` : ''}
+        </div>`).join('')}
+      ${Auth.isAdmin() ? `<button class="btn btn-success btn-block mt-1" onclick="addMeetingForm()">➕ बैठक निर्णय थप्नुहोस्</button>` : ''}
+    </div>
+  `;
+
+  if (Auth.isMember()) {
+    html += `
+      <div class="section-card">
+        <div class="section-title">💡 सुझाव / सल्लाह</div>
+        <button class="btn btn-warning btn-block mb-1" onclick="addSuggestionForm()">✍️ सुझाव दिनुहोस्</button>
+        ${suggestions.filter(s => s.memberId === Auth.currentUser.memberId).map(s =>
+          `<div class="section-card" style="padding:8px;margin-top:6px"><div>${s.text}</div>
+          ${s.reply ? `<div style="margin-top:4px;padding:6px;background:#e7f1ff;border-radius:8px;font-size:0.85rem"><strong>Admin:</strong> ${s.reply}</div>` : ''}
+          </div>`).join('')}
+      </div>
+    `;
+  } else {
+    html += `
+      <div class="section-card">
+        <div class="section-title">💡 सदस्य सुझावहरू</div>
+        ${suggestions.length === 0 ? '<div class="text-muted">कुनै सुझाव छैन</div>' :
+          suggestions.slice().reverse().map(s => {
+            const m = data.members.find(x => x.id === s.memberId);
+            return `<div class="section-card" style="padding:10px;margin-bottom:6px">
+              <div class="fw-bold">${m ? m.name : s.memberId}</div>
+              <div>${s.text}</div>
+              ${s.reply ? `<div style="margin-top:4px;padding:6px;background:#e7f1ff;border-radius:8px"><strong>जवाफ:</strong> ${s.reply}</div>` :
+                `<div class="form-group mt-1"><input type="text" id="sug-reply-${s.id}" placeholder="जवाफ..."><button class="btn btn-primary btn-sm mt-1" onclick="replySuggestion('${s.id}')">जवाफ</button></div>`}
+            </div>`;
+          }).join('')}
+      </div>
+    `;
+  }
+
+  container.innerHTML = html;
+}
+
+function addRuleForm() {
+  const html = `<div class="form-group"><label>नियमको बुँदा</label><textarea id="rule-text" rows="3" placeholder="नियम लेख्नुहोस्..."></textarea></div>
+    <button class="btn btn-primary btn-block" onclick="saveRule()">💾 सेभ</button>`;
+  UI.showModal('➕ नियम', html, '<button class="btn btn-outline" onclick="closeModal()">रद्द</button>');
+}
+
+function saveRule() {
+  const text = document.getElementById('rule-text').value.trim();
+  if (!text) return UI.toast('नियम लेख्नुहोस्', 'error');
+  const data = DB.load();
+  data.rules = data.rules || [];
+  data.rules.push({ id: 'r_' + Date.now(), text, time: new Date().toISOString() });
+  DB.save(data);
+  UI.toast('नियम सेभ भयो', 'success');
+  closeModal();
+  renderVidhanTab();
+}
+
+function deleteRule(id) {
+  const data = DB.load();
+  data.rules = (data.rules || []).filter(r => r.id !== id);
+  DB.save(data);
+  renderVidhanTab();
+}
+
+function addMeetingForm() {
+  const html = `
+    <div class="form-group"><label>बैठक शीर्षक</label><input type="text" id="mt-title" placeholder="उदा: मासिक बैठक"></div>
+    <div class="form-group"><label>निर्णय</label><textarea id="mt-decision" rows="3" placeholder="निर्णय लेख्नुहोस्..."></textarea></div>
+    <button class="btn btn-success btn-block" onclick="saveMeeting()">💾 सेभ</button>`;
+  UI.showModal('➕ बैठक निर्णय', html, '<button class="btn btn-outline" onclick="closeModal()">रद्द</button>');
+}
+
+function saveMeeting() {
+  const title = document.getElementById('mt-title').value.trim();
+  const decision = document.getElementById('mt-decision').value.trim();
+  if (!title || !decision) return UI.toast('शीर्षक र निर्णय चाहिन्छ', 'error');
+  const data = DB.load();
+  data.meetings = data.meetings || [];
+  data.meetings.push({ id: 'mt_' + Date.now(), title, decision, time: new Date().toISOString() });
+  DB.save(data);
+  UI.toast('सेभ भयो', 'success');
+  closeModal();
+  renderVidhanTab();
+}
+
+function deleteMeeting(id) {
+  const data = DB.load();
+  data.meetings = (data.meetings || []).filter(m => m.id !== id);
+  DB.save(data);
+  renderVidhanTab();
+}
+
+function addSuggestionForm() {
+  const html = `<div class="form-group"><label>सुझाव / सल्लाह</label><textarea id="sug-text" rows="3"></textarea></div>
+    <button class="btn btn-warning btn-block" onclick="saveSuggestion()">📤 पठाउनुहोस्</button>`;
+  UI.showModal('💡 सुझाव', html, '<button class="btn btn-outline" onclick="closeModal()">रद्द</button>');
+}
+
+function saveSuggestion() {
+  const text = document.getElementById('sug-text').value.trim();
+  if (!text) return UI.toast('केही लेख्नुहोस्', 'error');
+  const data = DB.load();
+  data.suggestions = data.suggestions || [];
+  data.suggestions.push({ id: 'sg_' + Date.now(), memberId: Auth.currentUser.memberId, text, time: new Date().toISOString(), reply: null });
+  DB.save(data);
+  UI.toast('सुझाव पठाइयो', 'success');
+  closeModal();
+  renderVidhanTab();
+}
+
+function replySuggestion(id) {
+  const input = document.getElementById('sug-reply-' + id);
+  const text = input ? input.value.trim() : '';
+  if (!text) return UI.toast('जवाफ लेख्नुहोस्', 'error');
+  const data = DB.load();
+  const s = (data.suggestions || []).find(x => x.id === id);
+  if (s) s.reply = text;
+  DB.save(data);
+  UI.toast('जवाफ सेभ भयो', 'success');
+  renderVidhanTab();
+}
+
+</script>
+</body>
